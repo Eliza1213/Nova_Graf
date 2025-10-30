@@ -1,67 +1,86 @@
-import express from 'express';
-import bcrypt from 'bcrypt';
-import poolPromise from '../db.js';
+import express from "express";
+import Usuario from "../models/Usuario.js";
+import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
 
 const router = express.Router();
 
+// 📝 Registro de usuario con confirmación de correo
 router.post("/registro", async (req, res) => {
-  const { nombre, apellido_paterno, apellido_materno, correo, contraseña, telefono, pregunta_secreta } = req.body;
-
-  if (!nombre || !apellido_paterno || !correo || !contraseña) {
-    return res.status(400).send({ message: "Faltan campos obligatorios" });
-  }
-
   try {
-    const hashed = await bcrypt.hash(contraseña, 10);
-    const pool = await poolPromise;
+    const { nombre, apellido_paterno, apellido_materno, correo, contraseña, telefono, pregunta_secreta, respuesta } = req.body;
 
-    await pool.request()
-      .input("nombre", nombre)
-      .input("apellido_paterno", apellido_paterno)
-      .input("apellido_materno", apellido_materno)
-      .input("correo", correo)
-      .input("contraseña", hashed)
-      .input("telefono", telefono)
-      .input("pregunta_secreta", pregunta_secreta)
-      .query(`
-        INSERT INTO Usuarios (nombre, apellido_paterno, apellido_materno, correo, contraseña, telefono, pregunta_secreta)
-        VALUES (@nombre, @apellido_paterno, @apellido_materno, @correo, @contraseña, @telefono, @pregunta_secreta)
-      `);
+    // Validar que no exista un usuario con el mismo correo
+    const existeUsuario = await Usuario.findOne({ correo });
+    if (existeUsuario) {
+      return res.status(400).json({ message: "❌ El correo ya está registrado" });
+    }
 
-    res.send({ message: "Usuario registrado correctamente" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({ message: "Error interno del servidor" });
+    // Hashear la contraseña
+    const hash = await bcrypt.hash(contraseña, 10);
+
+    // Generar código de confirmación
+    const codigoConfirmacion = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Crear el usuario con confirmado=false
+    const nuevoUsuario = new Usuario({
+      nombre,
+      apellido_paterno,
+      apellido_materno,
+      correo,
+      contraseña: hash,
+      telefono,
+      pregunta_secreta,
+      respuesta,
+      confirmado: false,
+      codigoConfirmacion,
+    });
+
+    await nuevoUsuario.save();
+
+    // Enviar correo con código
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER, // tu correo
+        pass: process.env.EMAIL_PASS, // tu password o app password
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: correo,
+      subject: "Confirma tu correo",
+      text: `Tu código de confirmación es: ${codigoConfirmacion}`,
+    });
+
+    res.status(201).json({ message: "Usuario registrado correctamente. Revisa tu correo para confirmar." });
+  } catch (error) {
+    console.error("❌ Error al registrar:", error);
+    res.status(500).json({ message: error.message });
   }
 });
 
-
-// ================= LOGIN =================
-
-router.post("/login", async (req, res) => {
-  const { correo, contraseña } = req.body;
-
-  if (!correo || !contraseña) {
-    return res.status(400).send({ message: "Faltan campos obligatorios" });
-  }
-
+// 📝 Verificar código de confirmación
+router.post("/verificar-codigo", async (req, res) => {
   try {
-    const pool = await poolPromise;
-    const result = await pool.request()
-      .input("correo", correo)
-      .query("SELECT * FROM Usuarios WHERE correo = @correo");
+    const { correo, codigo } = req.body;
+    const usuario = await Usuario.findOne({ correo });
 
-    const user = result.recordset[0];
-    if (!user) return res.status(404).send({ message: "Usuario no encontrado" });
+    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
+    if (usuario.confirmado) return res.status(400).json({ message: "Usuario ya confirmado" });
+    if (usuario.codigoConfirmacion !== codigo) return res.status(400).json({ message: "Código incorrecto" });
 
-    const match = await bcrypt.compare(contraseña, user.contraseña);
-    if (!match) return res.status(401).send({ message: "Contraseña incorrecta" });
+    usuario.confirmado = true;
+    usuario.codigoConfirmacion = null;
+    await usuario.save();
 
-    res.send({ message: "Login exitoso", user: { id: user.id, nombre: user.nombre, correo: user.correo } });
-  } catch (err) {
-    console.error("❌ Error al iniciar sesión:", err);
-    res.status(500).send({ message: "Error interno del servidor" });
+    res.json({ message: "Correo confirmado correctamente 🎉" });
+  } catch (error) {
+    console.error("❌ Error al verificar código:", error);
+    res.status(500).json({ message: error.message });
   }
 });
+
 
 export default router;

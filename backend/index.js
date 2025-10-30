@@ -1,11 +1,21 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
+import "./db.js"; // 👈 Importa la conexión a MongoDB
 import authRoutes from "./routes/auth.js";
 
+dotenv.config();
+
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
+// Rutas del backend
 app.use("/api/auth", authRoutes);
 
-app.listen(4000, () => console.log("Servidor corriendo en http://localhost:4000"));
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+});

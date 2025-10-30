@@ -1,26 +1,14 @@
-import 'dotenv/config';
-import sql from 'mssql';
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
-const config = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    server: process.env.DB_SERVER,
-    database: process.env.DB_DATABASE,
-    port: parseInt(process.env.DB_PORT), // 1433
-    options: {
-        encrypt: false,               // Local, no requiere SSL
-        enableArithAbort: true,
-        trustServerCertificate: true
-    }
-};
+dotenv.config();
 
-const poolPromise = sql.connect(config)
-    .then(pool => {
-        console.log('✅ Conectado a SQL Server con usuario y contraseña');
-        return pool;
-    })
-    .catch(err => {
-        console.error('❌ Error de conexión a la base de datos:', err.message);
-    });
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ Conectado a MongoDB Atlas"))
+  .catch((err) => console.error("❌ Error de conexión a MongoDB:", err.message));
 
-export default poolPromise;
+export default mongoose;
