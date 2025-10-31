@@ -1,86 +1,39 @@
 import express from "express";
-import Usuario from "../models/Usuario.js";
-import nodemailer from "nodemailer";
-import bcrypt from "bcrypt";
+import { registerUser, verificarOTP, login,  reenviarCodigo,} from "../controllers/authController.js";
+import {
+  recuperarContraseña,
+  verificarCodigo,
+  actualizarContraseña,
+  obtenerPreguntaSecreta,
+  verificarRespuestaSecreta,
+} from "../controllers/recuperarController.js";
 
 const router = express.Router();
 
-// 📝 Registro de usuario con confirmación de correo
-router.post("/registro", async (req, res) => {
-  try {
-    const { nombre, apellido_paterno, apellido_materno, correo, contraseña, telefono, pregunta_secreta, respuesta } = req.body;
+// Registro con OTP
+router.post("/register", registerUser);
 
-    // Validar que no exista un usuario con el mismo correo
-    const existeUsuario = await Usuario.findOne({ correo });
-    if (existeUsuario) {
-      return res.status(400).json({ message: "❌ El correo ya está registrado" });
-    }
+// Verificar OTP
+router.post("/verificar-otp", verificarOTP);
+// Login
+router.post("/login", login);
+// 🔹 Recuperación de contraseña (envía código OTP al correo)
+router.post("/recuperar", recuperarContraseña);
 
-    // Hashear la contraseña
-    const hash = await bcrypt.hash(contraseña, 10);
+// 🔹 Verificación del código OTP recibido por correo
+router.post("/verificar-codigo", verificarCodigo);
 
-    // Generar código de confirmación
-    const codigoConfirmacion = Math.floor(100000 + Math.random() * 900000).toString();
+// 🔹 Actualización de la contraseña después de verificar el código
+router.post("/actualizar-contrasena", actualizarContraseña);
 
-    // Crear el usuario con confirmado=false
-    const nuevoUsuario = new Usuario({
-      nombre,
-      apellido_paterno,
-      apellido_materno,
-      correo,
-      contraseña: hash,
-      telefono,
-      pregunta_secreta,
-      respuesta,
-      confirmado: false,
-      codigoConfirmacion,
-    });
+// 🔹 Rutas para recuperación por pregunta secreta
+router.post("/obtener-pregunta", obtenerPreguntaSecreta);        // Devuelve la pregunta según correo
+router.post("/verificar-respuesta", verificarRespuestaSecreta);  // Verifica la respuesta a la pregunta secreta
 
-    await nuevoUsuario.save();
 
-    // Enviar correo con código
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER, // tu correo
-        pass: process.env.EMAIL_PASS, // tu password o app password
-      },
-    });
+router.post("/reenviar-codigo", reenviarCodigo);
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: correo,
-      subject: "Confirma tu correo",
-      text: `Tu código de confirmación es: ${codigoConfirmacion}`,
-    });
 
-    res.status(201).json({ message: "Usuario registrado correctamente. Revisa tu correo para confirmar." });
-  } catch (error) {
-    console.error("❌ Error al registrar:", error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// 📝 Verificar código de confirmación
-router.post("/verificar-codigo", async (req, res) => {
-  try {
-    const { correo, codigo } = req.body;
-    const usuario = await Usuario.findOne({ correo });
-
-    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
-    if (usuario.confirmado) return res.status(400).json({ message: "Usuario ya confirmado" });
-    if (usuario.codigoConfirmacion !== codigo) return res.status(400).json({ message: "Código incorrecto" });
-
-    usuario.confirmado = true;
-    usuario.codigoConfirmacion = null;
-    await usuario.save();
-
-    res.json({ message: "Correo confirmado correctamente 🎉" });
-  } catch (error) {
-    console.error("❌ Error al verificar código:", error);
-    res.status(500).json({ message: error.message });
-  }
-});
 
 
 export default router;

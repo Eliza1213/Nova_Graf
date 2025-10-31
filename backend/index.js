@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import "./db.js"; // 👈 Importa la conexión a MongoDB
+import "./config/db.js"; // 👈 Importa la conexión a MongoDB
 import authRoutes from "./routes/auth.js";
 
 dotenv.config();

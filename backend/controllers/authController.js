@@ -1,77 +1,132 @@
 import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
-import nodemailer from "nodemailer";
+import { sendOTPEmail } from "../utils/sendEmail.js";
 
-// Configuración del correo
-const transporter = nodemailer.createTransport({
-  service: "gmail", // o tu proveedor de correo
-  auth: {
-    user: process.env.EMAIL_USER, // tu correo
-    pass: process.env.EMAIL_PASS  // contraseña o App Password
+// Registro inicial
+export const registerUser = async (req, res) => {
+  const {
+    nombre,
+    apellido_paterno,
+    apellido_materno,
+    correo,
+    contraseña,
+    confirmarContraseña,
+    telefono,
+    pregunta_secreta,
+    respuesta,
+  } = req.body;
+
+  if (contraseña !== confirmarContraseña) {
+    return res.status(400).json({ message: "Las contraseñas no coinciden" });
   }
-});
 
-// Registro de usuario con confirmación
-export const registro = async (req, res) => {
   try {
-    const { correo, contraseña } = req.body;
+    const existingUser = await Usuario.findOne({ correo });
+    if (existingUser) return res.status(400).json({ message: "Correo ya registrado" });
 
-    // Verificar si el correo ya existe
-    const existe = await Usuario.findOne({ correo });
-    if (existe) {
-      return res.status(400).json({ message: "Correo ya registrado" });
-    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(contraseña, salt);
 
-    // Encriptar contraseña
-    const hashContraseña = await bcrypt.hash(contraseña, 10);
+    // Generar OTP de 6 dígitos
+    const codigoOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Generar código de confirmación de 6 dígitos
-    const codigoConfirmacion = Math.floor(100000 + Math.random() * 900000).toString();
-
-    const nuevoUsuario = new Usuario({
-      ...req.body,
-      contraseña: hashContraseña,
-      confirmado: false,
-      codigoConfirmacion
+    const user = new Usuario({
+      nombre,
+      apellido_paterno,
+      apellido_materno,
+      correo,
+      contraseña: hashedPassword,
+      telefono,
+      pregunta_secreta,
+      respuesta,
+      codigoOTP,
+      otpExpira: new Date(Date.now() + 10 * 60 * 1000), // Expira en 10 minutos
     });
 
-    await nuevoUsuario.save();
+    await user.save();
 
-    // Enviar correo de confirmación
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: correo,
-      subject: "Confirma tu correo",
-      text: `Tu código de confirmación es: ${codigoConfirmacion}`
-    });
+    // Enviar OTP por correo
+    await sendOTPEmail(correo, codigoOTP);
 
-    res.status(201).json({ message: "Usuario registrado. Por favor, confirma tu correo con el código enviado." });
-  } catch (error) {
-    console.error("❌ Error al registrar:", error);
-    res.status(500).json({ message: error.message });
+    res.status(201).json({ message: "Ingresa el codigo para activar tu cuenta" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error al registrar usuario" });
   }
 };
 
-// Verificación del código
-export const verificarCodigo = async (req, res) => {
+// Verificar OTP
+export const verificarOTP = async (req, res) => {
+  const { correo, codigo } = req.body;
+
   try {
-    const { correo, codigo } = req.body;
+    const user = await Usuario.findOne({ correo, codigoOTP: codigo });
+    if (!user) return res.status(400).json({ message: "Código inválido" });
 
-    const usuario = await Usuario.findOne({ correo });
-    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
+    if (user.otpExpira < new Date()) return res.status(400).json({ message: "Código expirado" });
 
-    if (usuario.confirmado) return res.status(400).json({ message: "Usuario ya confirmado" });
+    user.confirmado = true;
+    user.codigoOTP = undefined;
+    user.otpExpira = undefined;
+    await user.save();
 
-    if (usuario.codigoConfirmacion === codigo) {
-      usuario.confirmado = true;
-      usuario.codigoConfirmacion = undefined; // borrar el código
-      await usuario.save();
-      return res.json({ message: "Correo confirmado correctamente 🎉" });
-    } else {
-      return res.status(400).json({ message: "Código incorrecto" });
-    }
+    res.json({ message: "Cuenta activada correctamente" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error al verificar OTP" });
+  }
+};
+// 🔹 LOGIN (Inicio de sesión)
+export const login = async (req, res) => {
+  const { correo, contraseña } = req.body;
+
+  try {
+    const user = await Usuario.findOne({ correo });
+    if (!user)
+      return res.status(404).json({ message: "El correo no está registrado" });
+
+    if (!user.confirmado)
+      return res
+        .status(403)
+        .json({ message: "Tu cuenta no está activada. Revisa tu correo." });
+
+    const passwordValida = await bcrypt.compare(contraseña, user.contraseña);
+    if (!passwordValida)
+      return res.status(401).json({ message: "Contraseña incorrecta" });
+
+    res.status(200).json({
+      message: `Bienvenido ${user.nombre}!`,
+      usuario: {
+        id: user._id,
+        correo: user.correo,
+        nombre: user.nombre,
+      },
+    });
   } catch (error) {
-    console.error("❌ Error en verificación:", error);
-    res.status(500).json({ message: error.message });
+    console.error("Error en login:", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
+// 🔹 REENVIAR CÓDIGO DE VERIFICACIÓN (para activación o recuperación)
+export const reenviarCodigo = async (req, res) => {
+  const { correo } = req.body;
+
+  try {
+    const usuario = await Usuario.findOne({ correo });
+    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado." });
+
+    // Generar nuevo código OTP
+    const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
+    usuario.codigoOTP = nuevoCodigo;
+    usuario.otpExpira = new Date(Date.now() + 10 * 60 * 1000);
+    await usuario.save();
+
+    await sendOTPEmail(correo, nuevoCodigo);
+
+    res.status(200).json({ message: "✅ Nuevo código reenviado al correo." });
+  } catch (error) {
+    console.error("Error al reenviar código:", error);
+    res.status(500).json({ message: "Error al reenviar el código." });
   }
 };

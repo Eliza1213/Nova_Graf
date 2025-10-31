@@ -11,7 +11,8 @@ const usuarioSchema = new mongoose.Schema({
   pregunta_secreta: { type: String, required: true },
   respuesta: { type: String, required: true },
   confirmado: { type: Boolean, default: false },
-  codigoConfirmacion: { type: String },
+  codigoOTP: { type: String },       // ✅ OTP
+  otpExpira: { type: Date },         // ✅ Expiración del OTP
 }, { timestamps: true });
 
 export default mongoose.model("Usuario", usuarioSchema);
