@@ -1,8 +1,53 @@
 import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
 import { sendOTPEmail } from "../utils/sendEmail.js";
+import { OAuth2Client } from "google-auth-library";
 
-// Registro inicial
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// 🔹 Registro con Google
+export const googleRegister = async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) return res.status(400).json({ message: "No se recibió token de Google" });
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) return res.status(400).json({ message: "Token inválido" });
+
+    const correo = payload.email;
+    const nombre = payload.name || "Usuario Google";
+
+    let user = await Usuario.findOne({ correo });
+
+    if (!user) {
+      user = new Usuario({
+        nombre,
+        correo,
+        googleUser: true,   // Marca como usuario Google
+        confirmado: true,   // Activado automáticamente
+      });
+      await user.save();
+    }
+
+    res.status(200).json({
+      message: user ? "Usuario ya registrado con Google" : "Usuario registrado con Google",
+      correo,
+      nombre,
+    });
+
+  } catch (err) {
+    console.error("Error Google Register:", err.message);
+    res.status(400).json({ message: "Token de Google inválido" });
+  }
+};
+
+// 🔹 Registro tradicional con OTP
 export const registerUser = async (req, res) => {
   const {
     nombre,
@@ -27,7 +72,6 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(contraseña, salt);
 
-    // Generar OTP de 6 dígitos
     const codigoOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
     const user = new Usuario({
@@ -40,29 +84,27 @@ export const registerUser = async (req, res) => {
       pregunta_secreta,
       respuesta,
       codigoOTP,
-      otpExpira: new Date(Date.now() + 10 * 60 * 1000), // Expira en 10 minutos
+      otpExpira: new Date(Date.now() + 10 * 60 * 1000),
     });
 
     await user.save();
 
-    // Enviar OTP por correo
     await sendOTPEmail(correo, codigoOTP);
 
-    res.status(201).json({ message: "Ingresa el codigo para activar tu cuenta" });
+    res.status(201).json({ message: "Ingresa el código para activar tu cuenta" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error al registrar usuario" });
   }
 };
 
-// Verificar OTP
+// 🔹 Verificar OTP
 export const verificarOTP = async (req, res) => {
   const { correo, codigo } = req.body;
 
   try {
     const user = await Usuario.findOne({ correo, codigoOTP: codigo });
     if (!user) return res.status(400).json({ message: "Código inválido" });
-
     if (user.otpExpira < new Date()) return res.status(400).json({ message: "Código expirado" });
 
     user.confirmado = true;
@@ -76,23 +118,21 @@ export const verificarOTP = async (req, res) => {
     res.status(500).json({ message: "Error al verificar OTP" });
   }
 };
-// 🔹 LOGIN (Inicio de sesión)
+
+// 🔹 Login
 export const login = async (req, res) => {
   const { correo, contraseña } = req.body;
 
   try {
     const user = await Usuario.findOne({ correo });
-    if (!user)
-      return res.status(404).json({ message: "El correo no está registrado" });
+    if (!user) return res.status(404).json({ message: "El correo no está registrado" });
+    if (!user.confirmado) return res.status(403).json({ message: "Tu cuenta no está activada. Revisa tu correo." });
 
-    if (!user.confirmado)
-      return res
-        .status(403)
-        .json({ message: "Tu cuenta no está activada. Revisa tu correo." });
+    const passwordValida = user.googleUser
+      ? true // Usuarios Google no requieren contraseña
+      : await bcrypt.compare(contraseña, user.contraseña);
 
-    const passwordValida = await bcrypt.compare(contraseña, user.contraseña);
-    if (!passwordValida)
-      return res.status(401).json({ message: "Contraseña incorrecta" });
+    if (!passwordValida) return res.status(401).json({ message: "Contraseña incorrecta" });
 
     res.status(200).json({
       message: `Bienvenido ${user.nombre}!`,
@@ -108,7 +148,7 @@ export const login = async (req, res) => {
   }
 };
 
-// 🔹 REENVIAR CÓDIGO DE VERIFICACIÓN (para activación o recuperación)
+// 🔹 Reenviar código OTP
 export const reenviarCodigo = async (req, res) => {
   const { correo } = req.body;
 
@@ -116,7 +156,6 @@ export const reenviarCodigo = async (req, res) => {
     const usuario = await Usuario.findOne({ correo });
     if (!usuario) return res.status(404).json({ message: "Usuario no encontrado." });
 
-    // Generar nuevo código OTP
     const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
     usuario.codigoOTP = nuevoCodigo;
     usuario.otpExpira = new Date(Date.now() + 10 * 60 * 1000);

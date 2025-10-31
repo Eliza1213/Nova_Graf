@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, verificarOTP, login,  reenviarCodigo,} from "../controllers/authController.js";
+import { registerUser, verificarOTP, login,  reenviarCodigo, googleRegister} from "../controllers/authController.js";
 import {
   recuperarContraseña,
   verificarCodigo,
@@ -32,7 +32,8 @@ router.post("/verificar-respuesta", verificarRespuestaSecreta);  // Verifica la 
 
 
 router.post("/reenviar-codigo", reenviarCodigo);
-
+router.post("/google-register", googleRegister);
+router.post("/google", googleRegister); // ✅ agregar esta ruta para el login
 
 
 
