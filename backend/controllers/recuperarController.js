@@ -29,29 +29,27 @@ export const recuperarContraseña = async (req, res) => {
 export const verificarCodigo = async (req, res) => {
   const { correo, codigo } = req.body;
 
-  console.log("🟢 Recibido desde frontend:", { correo, codigo });
-  console.log("📦 Códigos guardados actualmente:", codigos);
+  try {
+    const usuario = await Usuario.findOne({ correo });
+    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado." });
 
-  const registro = codigos[correo];
-  if (!registro) {
-    console.log("⚠️ No se encontró código para:", correo);
-    return res.status(400).json({ message: "No se encontró un código para este correo." });
+    if (!usuario.codigoOTP) return res.status(400).json({ message: "No hay código activo. Solicita uno nuevo." });
+    if (usuario.otpExpira < new Date()) return res.status(400).json({ message: "Código expirado." });
+
+    if (usuario.codigoOTP !== codigo) return res.status(400).json({ message: "Código incorrecto." });
+
+    // ✅ Código correcto
+    usuario.codigoOTP = undefined;
+    usuario.otpExpira = undefined;
+    await usuario.save();
+
+    res.status(200).json({ message: "Código verificado correctamente." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al verificar el código" });
   }
-
-  if (registro.expira < Date.now()) {
-    console.log("⏰ Código expirado para:", correo);
-    delete codigos[correo];
-    return res.status(400).json({ message: "El código ha expirado." });
-  }
-
-  if (String(registro.codigo).trim() !== String(codigo).trim()) {
-    console.log("❌ Código incorrecto. Esperado:", registro.codigo);
-    return res.status(400).json({ message: "Código incorrecto." });
-  }
-
-  console.log("✅ Código correcto para:", correo);
-  return res.status(200).json({ message: "Código verificado correctamente." });
 };
+
 
 // Actualizar contraseña
 export const actualizarContraseña = async (req, res) => {

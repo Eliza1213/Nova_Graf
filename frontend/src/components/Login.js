@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google"; // ✅ ESTA LÍNEA ES OBLIGATORIA
-import jwt_decode from "jwt-decode"; // para leer los datos del usuario de Google
+
 import "../Login.css";
 
 const Login = () => {

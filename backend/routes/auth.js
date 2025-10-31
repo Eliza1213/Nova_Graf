@@ -30,7 +30,6 @@ router.post("/actualizar-contrasena", actualizarContraseña);
 router.post("/obtener-pregunta", obtenerPreguntaSecreta);        // Devuelve la pregunta según correo
 router.post("/verificar-respuesta", verificarRespuestaSecreta);  // Verifica la respuesta a la pregunta secreta
 
-
 router.post("/reenviar-codigo", reenviarCodigo);
 router.post("/google-register", googleRegister);
 router.post("/google", googleRegister); // ✅ agregar esta ruta para el login

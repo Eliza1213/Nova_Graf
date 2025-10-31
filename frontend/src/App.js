@@ -9,6 +9,7 @@ import VerificarCodigo from "./components/VerificarCodigo";
 import CambiarContraseña from "./components/CambiarContraseña";
 import RecuperarPregunta from "./components/RecuperarPregunta";
 import IngresarCorreo from "./components/IngresarCorreo";
+import ActivarCuenta from "./components/ActivarCuenta";
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/cambiar-contrasena" element={<CambiarContraseña />} />
         <Route path="/recuperar-pregunta" element={<RecuperarPregunta />} /> 
         <Route path="/ingresar-correo" element={<IngresarCorreo />} />   
+        <Route path="/activar-cuenta" element={<ActivarCuenta />} /> 
       </Routes>
     </div>
   );

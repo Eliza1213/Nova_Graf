@@ -1,28 +1,26 @@
-import nodemailer from "nodemailer";
+// sendemail.js (función de activación corregida)
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_SECURE === "true",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: { rejectUnauthorized: false }, // solo desarrollo
-});
+import sgMail from "@sendgrid/mail";
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const sendOTPEmail = async (correo, codigoOTP) => {
-  const mailOptions = {
-    from: `"Novagraf" <${process.env.EMAIL_USER}>`,
-    to: correo,
-    subject: "Código OTP para activar tu cuenta",
-    html: `
-      <h2>Bienvenido a Novagraf</h2>
-      <p>Tu código de verificación es:</p>
-      <h3>${codigoOTP}</h3>
-      <p>Ingresa este código en la app para activar tu cuenta. Expira en 10 minutos.</p>
-    `,
-  };
-
-  await transporter.sendMail(mailOptions);
+  try {
+    const msg = {
+      to: correo,
+      from: { // 💡 CORRECCIÓN: Usar el formato de objeto
+        name: process.env.SENDGRID_FROM_NAME, 
+        email: process.env.SENDGRID_FROM_EMAIL,
+      }, 
+      subject: "Código de activación Nova Graf",
+      html: `<h2>Bienvenido a NovaGraf</h2>
+             <p>Tu código de verificación es:</p>
+             <h3>${codigoOTP}</h3>
+             <p>Expira en 10 minutos.</p>`,
+    };
+    await sgMail.send(msg);
+    console.log("Correo de activación enviado a:", correo);
+  } catch (err) {
+    console.error("Error enviando correo de activación:", err.response?.body || err.message);
+    throw new Error("No se pudo enviar el correo de activación");
+  }
 };

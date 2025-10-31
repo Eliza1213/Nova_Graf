@@ -1,20 +1,14 @@
-import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_SECURE === "true",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: { rejectUnauthorized: false },
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const enviarCorreoRecuperacion = async (correo, codigoOTP) => {
-  const mailOptions = {
-    from: `"NovaGraf" <${process.env.EMAIL_USER}>`,
+  const msg = {
     to: correo,
+    from: {
+      name: process.env.SENDGRID_FROM_NAME,
+      email: process.env.SENDGRID_FROM_EMAIL,
+    },
     subject: "Recuperación de contraseña - NovaGraf",
     html: `
       <h2>Recuperación de contraseña</h2>
@@ -26,5 +20,11 @@ export const enviarCorreoRecuperacion = async (correo, codigoOTP) => {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    await sgMail.send(msg);
+    console.log("Correo de recuperación enviado a", correo);
+  } catch (error) {
+    console.error("Error enviando correo:", error.response?.body || error.message);
+    throw new Error("No se pudo enviar el correo de recuperación");
+  }
 };

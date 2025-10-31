@@ -47,7 +47,6 @@ export const googleRegister = async (req, res) => {
   }
 };
 
-// 🔹 Registro tradicional con OTP
 export const registerUser = async (req, res) => {
   const {
     nombre,
@@ -84,40 +83,30 @@ export const registerUser = async (req, res) => {
       pregunta_secreta,
       respuesta,
       codigoOTP,
-      otpExpira: new Date(Date.now() + 10 * 60 * 1000),
+      otpExpira: new Date(Date.now() + 10 * 60 * 1000), // 10 minutos
+      confirmado: false, // Por defecto no confirmado
     });
 
     await user.save();
+    console.log("Usuario registrado:", correo, "OTP:", codigoOTP);
 
-    await sendOTPEmail(correo, codigoOTP);
-
-    res.status(201).json({ message: "Ingresa el código para activar tu cuenta" });
+    try {
+      await sendOTPEmail(correo, codigoOTP);
+      console.log("Correo de activación enviado a:", correo);
+      return res.status(201).json({ message: "Ingresa el código para activar tu cuenta" });
+    } catch (err) {
+      console.error("Error al enviar correo de activación:", err);
+      return res.status(500).json({
+        message: "Usuario registrado, pero no se pudo enviar el correo de activación",
+      });
+    }
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error al registrar usuario" });
+    console.error("Error al registrar usuario:", err);
+    return res.status(500).json({ message: "Error al registrar usuario" });
   }
 };
 
-// 🔹 Verificar OTP
-export const verificarOTP = async (req, res) => {
-  const { correo, codigo } = req.body;
 
-  try {
-    const user = await Usuario.findOne({ correo, codigoOTP: codigo });
-    if (!user) return res.status(400).json({ message: "Código inválido" });
-    if (user.otpExpira < new Date()) return res.status(400).json({ message: "Código expirado" });
-
-    user.confirmado = true;
-    user.codigoOTP = undefined;
-    user.otpExpira = undefined;
-    await user.save();
-
-    res.json({ message: "Cuenta activada correctamente" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error al verificar OTP" });
-  }
-};
 
 // 🔹 Login
 export const login = async (req, res) => {
@@ -148,6 +137,32 @@ export const login = async (req, res) => {
   }
 };
 
+// 🔹 Verificar OTP (registro o recuperación)
+export const verificarOTP = async (req, res) => {
+   const { correo, codigo } = req.body;
+ 
+   try {
+     const usuario = await Usuario.findOne({ correo });
+     if (!usuario) return res.status(404).json({ message: "Usuario no encontrado." });
+ 
+     if (!usuario.codigoOTP) return res.status(400).json({ message: "No hay código activo. Solicita uno nuevo." });
+     if (usuario.otpExpira < new Date()) return res.status(400).json({ message: "Código expirado." });
+ 
+     if (usuario.codigoOTP !== codigo) return res.status(400).json({ message: "Código incorrecto." });
+ 
+     // ✅ Código correcto
+     usuario.codigoOTP = undefined;
+     usuario.otpExpira = undefined;
+    usuario.confirmado = true; // ✅ activamos la cuenta
+     await usuario.save();
+ 
+     res.status(200).json({ message: "Código verificado correctamente." });
+   } catch (error) {
+     console.error(error);
+     res.status(500).json({ message: "Error al verificar el código" });
+   }
+ };
+
 // 🔹 Reenviar código OTP
 export const reenviarCodigo = async (req, res) => {
   const { correo } = req.body;
@@ -156,16 +171,17 @@ export const reenviarCodigo = async (req, res) => {
     const usuario = await Usuario.findOne({ correo });
     if (!usuario) return res.status(404).json({ message: "Usuario no encontrado." });
 
+    // Generar nuevo código y actualizar expiración
     const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
     usuario.codigoOTP = nuevoCodigo;
-    usuario.otpExpira = new Date(Date.now() + 10 * 60 * 1000);
+    usuario.otpExpira = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
     await usuario.save();
 
     await sendOTPEmail(correo, nuevoCodigo);
 
-    res.status(200).json({ message: "✅ Nuevo código reenviado al correo." });
+    res.status(200).json({ message: "✅ Nuevo código enviado al correo" });
   } catch (error) {
     console.error("Error al reenviar código:", error);
-    res.status(500).json({ message: "Error al reenviar el código." });
+    res.status(500).json({ message: "Error al reenviar el código" });
   }
 };

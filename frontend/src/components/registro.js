@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importar useNavigate
-import { GoogleLogin } from "@react-oauth/google"; 
-import "../registro.css"; // Tu CSS
+import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import "../registro.css";
+import ActivarCuenta from "./ActivarCuenta";
 
 const Register = () => {
-  const navigate = useNavigate(); // Hook para redirigir
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nombre: "",
     apellido_paterno: "",
@@ -20,6 +21,7 @@ const Register = () => {
   const [codigoOTP, setCodigoOTP] = useState("");
   const [showOTPForm, setShowOTPForm] = useState(false);
   const [message, setMessage] = useState("");
+  const [correoParaActivar, setCorreoParaActivar] = useState(null);
 
   // Mostrar / ocultar contraseñas
   const [showPassword, setShowPassword] = useState(false);
@@ -44,58 +46,42 @@ const Register = () => {
     });
     const data = await res.json();
     setMessage(data.message);
-    if (res.status === 201) setShowOTPForm(true);
-  };
 
-    // Verificación OTP
-  const handleVerifyOTP = async () => {
-    const res = await fetch("http://localhost:4000/api/auth/verificar-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ correo: formData.correo, codigo: codigoOTP }),
-    });
-    const data = await res.json();
-    setMessage(data.message);
-
-    if (res.status === 200) {
-      // ✅ Redirigir al login después de confirmar
-      setTimeout(() => {
-        navigate("/login"); // Redirige al login
-      }, 2000); // Opcional: espera 2 segundos para mostrar el mensaje
+    if (res.status === 201) {
+      // Guardamos correo para activar la cuenta
+      setCorreoParaActivar(formData.correo);
     }
   };
 
   // Registro con Google
- const handleGoogleRegister = async (credentialResponse) => {
-  if (!credentialResponse || !credentialResponse.credential) {
-    setMessage("No se recibió token de Google");
-    return;
-  }
-
-  try {
-    const res = await fetch("http://localhost:4000/api/auth/google-register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: credentialResponse.credential }),
-    });
-
-    const data = await res.json();
-    setMessage(data.message);
-
-    if (res.status === 200) {
-      setTimeout(() => navigate("/login"), 2000); // Redirige al login
+  const handleGoogleRegister = async (credentialResponse) => {
+    if (!credentialResponse || !credentialResponse.credential) {
+      setMessage("No se recibió token de Google");
+      return;
     }
-  } catch (error) {
-    console.error("Error al registrar con Google:", error);
-    setMessage("Error de conexión con el servidor");
-  }
-};
 
+    try {
+      const res = await fetch("http://localhost:4000/api/auth/google-register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: credentialResponse.credential }),
+      });
+
+      const data = await res.json();
+      setMessage(data.message);
+
+      if (res.status === 200) {
+        setTimeout(() => navigate("/login"), 2000);
+      }
+    } catch (error) {
+      console.error("Error al registrar con Google:", error);
+      setMessage("Error de conexión con el servidor");
+    }
+  };
 
   return (
     <div className="register-container">
-      <h2>Registro Novagraf</h2>
-      {!showOTPForm ? (
+      {!correoParaActivar ? (
         <div className="form-group">
           <input name="nombre" placeholder="Nombre" onChange={handleChange} />
           <input name="apellido_paterno" placeholder="Apellido Paterno" onChange={handleChange} />
@@ -137,24 +123,18 @@ const Register = () => {
 
           <input name="respuesta" placeholder="Respuesta" onChange={handleChange} />
           <button onClick={handleRegister}>Registrarse</button>
-           {/* 🔹 Enlace para ir al login*/}
-        <p className="register-link">
-          ¿Ya tienes cuenta?{" "}
-          <span onClick={() => navigate("/login")}>Iniciar Sesión</span>
-        </p>
-        <hr />
+
+          <p className="register-link">
+            ¿Ya tienes cuenta?{" "}
+            <span onClick={() => navigate("/login")}>Iniciar Sesión</span>
+          </p>
+          <hr />
           <GoogleLogin onSuccess={handleGoogleRegister} onError={() => setMessage("Error Google Sign-In")} />
         </div>
       ) : (
-        <div className="otp-container">
-          <input
-            placeholder="Ingresa código OTP"
-            value={codigoOTP}
-            onChange={(e) => setCodigoOTP(e.target.value)}
-          />
-          <button onClick={handleVerifyOTP}>Verificar código</button>
-        </div>
+        <ActivarCuenta correo={correoParaActivar} />
       )}
+
       {message && <p className="message">{message}</p>}
     </div>
   );
