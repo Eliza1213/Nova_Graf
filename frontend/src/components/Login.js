@@ -20,7 +20,7 @@ const Login = () => {
    // Login tradicional
   const handleLogin = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/auth/login", {
+      const res = await fetch("https://novagraf-production-3bea.up.railway.app/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -58,7 +58,7 @@ const Login = () => {
    // Verificar OTP
   const handleVerifyOTP = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/auth/verificar-otp", {
+      const res = await fetch("https://novagraf-production-3bea.up.railway.app/api/auth/verificar-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: formData.correo, codigo: codigoOTP }),
@@ -79,7 +79,7 @@ const Login = () => {
   // Login con Google
   const handleGoogleLogin = async (credentialResponse) => {
     try {
-      const res = await fetch("http://localhost:4000/api/auth/google", {
+      const res = await fetch("https://novagraf-production-3bea.up.railway.app/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: credentialResponse.credential }),

@@ -8,7 +8,7 @@ const ActivarCuenta = ({ correo }) => {
 
   const handleVerificarOTP = async () => {
   try {
-    const res = await fetch("http://localhost:4000/api/auth/verificar-otp", { // ✅ cambiar ruta
+    const res = await fetch("https://novagraf-production-3bea.up.railway.app/api/auth/verificar-otp", { // ✅ cambiar ruta
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ correo, codigo: codigoOTP }),
@@ -24,7 +24,7 @@ const ActivarCuenta = ({ correo }) => {
 
 const handleReenviarOTP = async () => {
   try {
-    const res = await fetch("http://localhost:4000/api/auth/reenviar-codigo", {
+    const res = await fetch("https://novagraf-production-3bea.up.railway.app/api/auth/reenviar-codigo", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ correo }),

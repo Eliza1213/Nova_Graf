@@ -5,7 +5,7 @@ const usuarioSchema = new mongoose.Schema({
   apellido_paterno: { type: String, required: function() { return !this.googleUser; } },
   apellido_materno: { type: String },
   correo: { type: String, required: true, unique: true },
-  contraseña: { type: String, required: function() { return !this.googleUser; } },
+  password: { type: String, required: function () { return !this.googleUser; } },
   telefono: { type: String },
   pregunta_secreta: { type: String, required: function() { return !this.googleUser; } },
   respuesta: { type: String, required: function() { return !this.googleUser; } },
