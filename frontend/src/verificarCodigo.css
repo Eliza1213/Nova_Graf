@@ -1,0 +1,429 @@
+/* verificar-codigo.css - Diseño Responsivo Negro/Verde */
+
+/* Variables CSS consistentes */
+:root {
+  --primary-color: #2e7d32;
+  --primary-dark: #1b5e20;
+  --primary-light: #4caf50;
+  --error-color: #c62828;
+  --success-color: #2e7d32;
+  --text-color: #212121;
+  --text-light: #757575;
+  --background-light: #f8f9fa;
+  --background-white: #ffffff;
+  --border-color: #e0e0e0;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --transition: all 0.3s ease;
+}
+
+/* Contenedor principal */
+.verificar-container {
+  max-width: 450px;
+  width: 90%;
+  margin: 80px auto;
+  background: linear-gradient(135deg, var(--background-white) 0%, #f8f9fa 100%);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto decorativo superior */
+.verificar-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+}
+
+/* Título */
+.verificar-container h2 {
+  text-align: center;
+  color: var(--text-color);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Información del correo */
+.verificar-container p {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-color);
+  line-height: 1.5;
+}
+
+.verificar-container strong {
+  color: var(--primary-dark);
+  font-weight: 600;
+  word-break: break-all;
+}
+
+/* Formulario */
+.verificar-container form {
+  margin-bottom: 1.5rem;
+}
+
+/* Input de código */
+.verificar-container input {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 1.2rem;
+  text-align: center;
+  letter-spacing: 3px;
+  font-weight: 600;
+  background-color: var(--background-white);
+  color: var(--text-color);
+  transition: var(--transition);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
+}
+
+.verificar-container input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+  transform: translateY(-1px);
+}
+
+.verificar-container input.error {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+}
+
+.verificar-container input.valid {
+  border-color: var(--success-color);
+}
+
+/* Botones */
+.verificar-container button[type="submit"] {
+  width: 100%;
+  padding: 1.2rem 2rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.verificar-container button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+}
+
+.verificar-container button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+.verificar-container button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Botón de reenviar */
+.reenviar-btn {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 1.5rem;
+}
+
+.reenviar-btn:hover:not(:disabled) {
+  background-color: rgba(46, 125, 50, 0.1);
+  transform: translateY(-1px);
+}
+
+.reenviar-btn:active {
+  transform: translateY(0);
+}
+
+.reenviar-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Mensajes */
+.mensaje {
+  padding: 1rem 1.2rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.mensaje.error {
+  background-color: rgba(198, 40, 40, 0.08);
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
+}
+
+.mensaje.success {
+  background-color: rgba(46, 125, 50, 0.08);
+  color: var(--success-color);
+  border: 1px solid var(--success-color);
+}
+
+/* Mensajes de error de campo */
+.field-error {
+  color: var(--error-color);
+  font-size: 0.8rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  display: block;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Contador de tiempo */
+.timer-container {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(46, 125, 50, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-light);
+}
+
+.timer-container p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.timer {
+  font-weight: 600;
+  color: var(--primary-dark);
+  font-size: 1.1rem;
+}
+
+/* Animaciones */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.verificar-container {
+  animation: slideIn 0.5s ease-out;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Laptop (1024px+) */
+@media (min-width: 1024px) {
+  .verificar-container {
+    max-width: 480px;
+    margin: 100px auto;
+    padding: 3rem;
+  }
+  
+  .verificar-container h2 {
+    font-size: 2rem;
+  }
+  
+  .verificar-container input {
+    padding: 1.2rem 1.5rem;
+    font-size: 1.3rem;
+  }
+  
+  .verificar-container button[type="submit"] {
+    padding: 1.3rem 2rem;
+    font-size: 1.05rem;
+  }
+  
+  .reenviar-btn {
+    padding: 1.1rem 2rem;
+  }
+}
+
+/* Tablet (768px - 1023px) */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .verificar-container {
+    max-width: 500px;
+    margin: 80px auto;
+    padding: 2.5rem;
+  }
+}
+
+/* Móvil Grande (481px - 767px) */
+@media (max-width: 767px) and (min-width: 481px) {
+  .verificar-container {
+    width: 95%;
+    margin: 60px auto;
+    padding: 2rem;
+  }
+  
+  .verificar-container h2 {
+    font-size: 1.6rem;
+  }
+  
+  .verificar-container input {
+    padding: 0.9rem 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .verificar-container button[type="submit"] {
+    padding: 1.1rem 1.5rem;
+  }
+}
+
+/* Móvil Pequeño (320px - 480px) */
+@media (max-width: 480px) {
+  body {
+    padding: 0.8rem;
+    background: white;
+  }
+  
+  .verificar-container {
+    width: 100%;
+    margin: 40px 0;
+    padding: 1.5rem;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    min-height: calc(100vh - 80px);
+  }
+  
+  .verificar-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .verificar-container p {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .verificar-container input {
+    padding: 0.8rem;
+    font-size: 1rem;
+    letter-spacing: 2px;
+  }
+  
+  .verificar-container button[type="submit"] {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  .reenviar-btn {
+    padding: 0.9rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Móvil Muy Pequeño (hasta 320px) */
+@media (max-width: 320px) {
+  .verificar-container {
+    padding: 1.2rem;
+  }
+  
+  .verificar-container h2 {
+    font-size: 1.3rem;
+  }
+  
+  .verificar-container input {
+    padding: 0.7rem;
+    font-size: 0.95rem;
+  }
+  
+  .verificar-container button[type="submit"] {
+    padding: 0.9rem;
+    font-size: 0.95rem;
+  }
+  
+  .reenviar-btn {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Estados de carga */
+.button-loading {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.button-loading::after {
+  content: '';
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: button-spinner 0.8s linear infinite;
+  margin-left: 0.5rem;
+}
+
+@keyframes button-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mejoras de accesibilidad */
+.verificar-container button:focus,
+.verificar-container input:focus {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 2px;
+}
+
+/* Placeholders */
+::placeholder {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  letter-spacing: normal;
+}
