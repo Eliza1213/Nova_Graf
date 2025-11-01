@@ -39,7 +39,7 @@ const Register = () => {
 
   // Registro tradicional
   const handleRegister = async () => {
-    const res = await fetch("https://novagraf-production-3bea.up.railway.app/api/auth/register", {
+    const res = await fetch("https://novagraf-production.up.railway.app/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -61,7 +61,7 @@ const Register = () => {
     }
 
     try {
-      const res = await fetch("https://novagraf-production-3bea.up.railway.app/api/auth/google-register", {
+      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/google-register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: credentialResponse.credential }),

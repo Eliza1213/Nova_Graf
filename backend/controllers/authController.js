@@ -119,7 +119,7 @@ export const login = async (req, res) => {
 
     const passwordValida = user.googleUser
       ? true // Usuarios Google no requieren contraseña
-      : await bcrypt.compare(contraseña, usuario.password);
+      : await bcrypt.compare(contraseña, user.password);
 
 
     if (!passwordValida) return res.status(401).json({ message: "Contraseña incorrecta" });

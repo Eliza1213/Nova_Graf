@@ -18,7 +18,7 @@ const CambiarContraseña = () => {
     }
 
     try {
-      const res = await fetch("https://novagraf-production-3bea.up.railway.app/api/auth/actualizar-contrasena", {
+      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/actualizar-contrasena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, nuevaContraseña }),

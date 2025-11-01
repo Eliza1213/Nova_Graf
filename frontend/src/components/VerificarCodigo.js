@@ -14,7 +14,7 @@ const VerificarCodigo = () => {
     console.log("Enviando:", { correo, codigo });
 
     try {
-      const res = await fetch("https://novagraf-production-3bea.up.railway.app/api/auth/verificar-codigo", {
+      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/verificar-codigo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, codigo }),
@@ -37,7 +37,7 @@ const VerificarCodigo = () => {
     setMensaje("");
 
     try {
-      const res = await fetch("https://novagraf-production-3bea.up.railway.app/api/auth/reenviar-codigo", {
+      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/reenviar-codigo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo }),
