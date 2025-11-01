@@ -61,7 +61,7 @@ export const actualizarContraseña = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(nuevaContraseña, salt);
-    usuario.contraseña = hash;
+    usuario.password = hash;
     await usuario.save();
 
     delete codigos[correo];
