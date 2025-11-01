@@ -131,7 +131,7 @@ const Register = () => {
     }
   };
 
-  // Añadir efecto de shake a campos con error
+  
   const addShakeEffect = (fieldName) => {
     const field = document.querySelector(`[name="${fieldName}"]`);
     if (field) {

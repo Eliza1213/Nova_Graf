@@ -31,7 +31,7 @@ const Home = () => {
   };
 
   const handleServiceClick = (service) => {
-    // Aquí puedes manejar la navegación a diferentes servicios
+    
     console.log(`Navegando a: ${service}`);
   };
 
@@ -53,7 +53,7 @@ const Home = () => {
         </div>
       </nav>
 
-      {/* Nova Graf Logo and Welcome Section */}
+      {/* Nova Graf Bienvenido */}
       <header className="home-header">
         <div className="logo">
           <h1>Nova Graf</h1>

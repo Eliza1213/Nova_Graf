@@ -74,7 +74,7 @@ const CambiarContraseña = () => {
     if (Object.keys(nuevosErrores).length > 0) {
       setErrors(nuevosErrores);
       
-      // Efecto shake en campos con error
+      // Efecto  campos con error
       Object.keys(nuevosErrores).forEach(field => {
         const input = document.querySelector(`[name="${field}"]`);
         if (input) {
@@ -117,7 +117,7 @@ const CambiarContraseña = () => {
       setConfirmar(value);
     }
     
-    // Limpiar error del campo cuando el usuario escribe
+    
     if (errors[field]) {
       setErrors({
         ...errors,
@@ -125,7 +125,7 @@ const CambiarContraseña = () => {
       });
     }
     
-    // Limpiar mensaje general
+    
     if (mensaje) {
       setMensaje("");
     }

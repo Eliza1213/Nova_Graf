@@ -76,7 +76,7 @@ const Login = () => {
     }
   };
 
-  // Efecto shake para campos con error
+ 
   const addShakeEffect = (fieldName) => {
     const field = document.querySelector(`[name="${fieldName}"]`);
     if (field) {
