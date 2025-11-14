@@ -10,6 +10,7 @@ import {
   actualizarContraseña,
   obtenerPreguntaSecreta,
   verificarRespuestaSecreta,
+  reenviarCodigoRecuperacion,
 } from "../controllers/authController.js";
 
 const router = express.Router();
@@ -34,8 +35,9 @@ router.post("/actualizar-contrasena", actualizarContraseña);
 router.post("/obtener-pregunta-secreta", obtenerPreguntaSecreta);        // Devuelve la pregunta según correo
 router.post("/verificar-respuesta", verificarRespuestaSecreta);  // Verifica la respuesta a la pregunta secreta
 
-router.post("/reenviar-codigo-recuperacion", reenviarCodigo);
+router.post("/reenviar-codigo", reenviarCodigo);
 router.post("/google-register", googleRegister);
+router.post("/reenviar-codigo-recuperacion", reenviarCodigoRecuperacion);
 
 
 

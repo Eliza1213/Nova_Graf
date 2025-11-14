@@ -83,7 +83,7 @@ const ActivarCuenta = ({ correo }) => {
   const handleReenviarOTP = async () => {
     setIsResending(true);
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/reenviar-codigo-recuperacion", {
+      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/reenviar-codigo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo }),
