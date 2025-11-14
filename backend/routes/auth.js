@@ -1,12 +1,16 @@
 import express from "express";
-import { registerUser, verificarOTP, login,  reenviarCodigo, googleRegister} from "../controllers/authController.js";
 import {
+  registerUser, 
+  verificarOTP, 
+  login,  
+  reenviarCodigo,
+  googleRegister,
   recuperarContraseña,
   verificarCodigo,
   actualizarContraseña,
   obtenerPreguntaSecreta,
   verificarRespuestaSecreta,
-} from "../controllers/recuperarController.js";
+} from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -32,7 +36,6 @@ router.post("/verificar-respuesta", verificarRespuestaSecreta);  // Verifica la 
 
 router.post("/reenviar-codigo-recuperacion", reenviarCodigo);
 router.post("/google-register", googleRegister);
-router.post("/google", googleRegister); // ✅ agregar esta ruta para el login
 
 
 

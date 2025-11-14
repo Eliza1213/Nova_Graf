@@ -163,7 +163,7 @@ const Login = () => {
   // Login con Google
   const handleGoogleLogin = async (credentialResponse) => {
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/google", {
+      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/google-register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: credentialResponse.credential }),
