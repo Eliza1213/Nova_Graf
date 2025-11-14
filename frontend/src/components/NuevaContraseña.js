@@ -1,6 +1,7 @@
 // src/components/NuevaContraseña.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaKey, FaArrowLeft } from 'react-icons/fa';
 
 
 const NuevaContraseña = () => {
@@ -8,6 +9,11 @@ const NuevaContraseña = () => {
   const [nuevaContraseña, setNuevaContraseña] = useState("");
   const [mensaje, setMensaje] = useState("");
   const navigate = useNavigate();
+
+   const handleVolver = () => {
+    navigate("/login");
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,7 +56,16 @@ const NuevaContraseña = () => {
         />
 
         <button type="submit">Cambiar Contraseña</button>
+
+         
+              <div className="volver-link">
+                <span onClick={handleVolver}>
+                  <FaArrowLeft style={{ marginRight: '8px' }} />
+                  Volver al inicio de sesión
+                </span>
+              </div>
       </form>
+      
 
       {mensaje && <p className="mensaje">{mensaje}</p>}
     </div>
