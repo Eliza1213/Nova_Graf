@@ -6,7 +6,7 @@ import {
   reenviarCodigo,
   googleRegister,
   recuperarContraseña,
-  verificarCodigo,
+  verificarCodigoRecuperacion,
   actualizarContraseña,
   obtenerPreguntaSecreta,
   verificarRespuestaSecreta,
@@ -25,7 +25,7 @@ router.post("/login", login);
 router.post("/recuperar-contraseña", recuperarContraseña);
 
 // 🔹 Verificación del código OTP recibido por correo
-router.post("/verificar-codigo-recuperacion", verificarCodigo);
+router.post("/verificar-codigo-recuperacion", verificarCodigoRecuperacion);
 
 // 🔹 Actualización de la contraseña después de verificar el código
 router.post("/actualizar-contrasena", actualizarContraseña);
