@@ -108,8 +108,8 @@ body {
 /* ========== HERO SECTION ========== */
 .hero-section {
   background: linear-gradient(135deg, 
-    rgba(27, 94, 32, 0.9) 0%, 
-    rgba(46, 125, 50, 0.8) 100%),
+    rgba(30, 51, 32, 0.9) 0%, 
+    rgba(26, 46, 27, 0.8) 100%),
     url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect fill="%231b5e20" width="1200" height="800"/><g fill="%232e7d32" opacity="0.1"><circle cx="200" cy="200" r="100"/><circle cx="800" cy="400" r="150"/><circle cx="1000" cy="150" r="80"/></g></svg>');
   background-size: cover;
   background-position: center;

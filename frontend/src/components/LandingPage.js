@@ -192,7 +192,7 @@ const LandingPage = () => {
         </div>
         
         <div className="footer-bottom">
-          <p>&copy; 2024 Nova Graf. Todos los derechos reservados.</p>
+          <p>&copy; 2025 Nova Graf. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>

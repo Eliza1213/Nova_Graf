@@ -16,7 +16,7 @@ const CambiarContraseña = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-   const handleVolver = () => {
+  const handleVolver = () => {
     navigate("/login");
   };
 
