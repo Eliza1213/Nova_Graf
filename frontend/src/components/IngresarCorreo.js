@@ -20,7 +20,7 @@ const IngresarCorreo = () => {
         });
         const data = await res.json();
         setMensaje(data.message);
-        if (res.status === 200) navigate("/verificar-codigo");
+        if (res.status === 200) navigate("/verificar-codigo-recuperacion");
       } catch (err) {
         setMensaje("Error al enviar el código.");
       }

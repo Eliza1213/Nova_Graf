@@ -12,7 +12,7 @@ const NuevaContraseña = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:4000/api/auth/nueva-contraseña", {
+      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/nueva-contraseña", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, nuevaContraseña }),
