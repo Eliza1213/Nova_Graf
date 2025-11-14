@@ -36,6 +36,7 @@ const CambiarContraseña = () => {
     
     return errors;
   };
+  
 
   // Calcular fortaleza de contraseña
   const calcularFortaleza = (password) => {

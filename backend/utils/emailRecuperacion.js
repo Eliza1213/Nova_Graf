@@ -3,13 +3,20 @@ import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const enviarCorreoRecuperacion = async (correo, codigoOTP) => {
+  // Generar timestamp legible
+  const timestamp = new Date().toLocaleString('es-MX', { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    second: '2-digit'
+  });
+
   const msg = {
     to: correo,
     from: {
       name: process.env.SENDGRID_FROM_NAME,
       email: process.env.SENDGRID_FROM_EMAIL,
     },
-    subject: "Recuperación de contraseña - NovaGraf",
+    subject: `Recuperación de contraseña - NovaGraf [${timestamp}]`,
     html: `
       <h2>Recuperación de contraseña</h2>
       <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
