@@ -1,7 +1,7 @@
 // src/components/NuevaContraseña.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaKey, FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
 
 
 const NuevaContraseña = () => {

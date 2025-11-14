@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
+
 import "../cambiarContraseña.css";
 
 const CambiarContraseña = () => {
@@ -13,6 +15,10 @@ const CambiarContraseña = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+   const handleVolver = () => {
+    navigate("/login");
+  };
 
   // Validaciones de contraseña
   const validarContraseña = (password) => {
@@ -245,6 +251,13 @@ const CambiarContraseña = () => {
         >
           {isLoading ? "Actualizando..." : "Guardar nueva contraseña"}
         </button>
+
+         <div className="volver-link">
+                        <span onClick={handleVolver}>
+                          <FaArrowLeft style={{ marginRight: '8px' }} />
+                          Volver al inicio de sesión
+                        </span>
+                      </div>
       </form>
 
       {mensaje && (
