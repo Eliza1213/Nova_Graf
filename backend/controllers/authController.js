@@ -362,7 +362,7 @@ export const reenviarCodigoRecuperacion = async (req, res) => {
   }
 };
 
-// 🔹 Actualizar contraseña
+// 🔹 Actualizar contraseña (para recuperación)
 export const actualizarContraseña = async (req, res) => {
   const { correo, nuevaContraseña } = req.body;
 
@@ -374,6 +374,15 @@ export const actualizarContraseña = async (req, res) => {
     if (usuario.googleUser) {
       return res.status(422).json({ 
         message: "Esta cuenta fue registrada con Google. No puedes cambiar la contraseña manualmente." 
+      });
+    }
+
+    // 🔒 Verificar que la nueva contraseña no sea igual a la ACTUAL
+    // (aunque el usuario no la recuerde, el sistema sí la conoce)
+    const esMismaContraseña = await bcrypt.compare(nuevaContraseña, usuario.password);
+    if (esMismaContraseña) {
+      return res.status(400).json({ 
+        message: "La nueva contraseña no puede ser igual a tu contraseña actual." 
       });
     }
 
