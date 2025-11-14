@@ -239,7 +239,12 @@ const Login = () => {
           )}
 
           <p className="register-link">
-            ¿No tienes cuenta? <span onClick={() => navigate("/")}>Regístrate aquí</span>
+            ¿No tienes cuenta? <span onClick={() => navigate("/register")}>Regístrate aquí</span>
+          </p>
+
+          <p className="register-link">
+            Volver al inicio{" "}
+            <span onClick={() => navigate("/")}>Volver al inicio</span>
           </p>
           <div className="google-login-container">
             <GoogleLogin

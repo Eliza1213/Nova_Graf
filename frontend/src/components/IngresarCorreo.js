@@ -13,7 +13,7 @@ const IngresarCorreo = () => {
 
     if (metodo === "correo") {
       try {
-        const res = await fetch("https://novagraf-production.up.railway.app/api/auth/recuperar", {
+        const res = await fetch("https://novagraf-production.up.railway.app/api/auth/recuperar-contrasena", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ correo, opcion: "correo" }),

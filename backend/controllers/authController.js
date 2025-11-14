@@ -1,6 +1,7 @@
 import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
 import { sendOTPEmail } from "../utils/sendEmail.js";
+import { enviarCorreoRecuperacion } from "../utils/emailRecuperacion.js";
 import { OAuth2Client } from "google-auth-library";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -29,16 +30,30 @@ export const googleRegister = async (req, res) => {
       user = new Usuario({
         nombre,
         correo,
-        googleUser: true,   // Marca como usuario Google
-        confirmado: true,   // Activado automáticamente
+        googleUser: true,
+        confirmado: true,
       });
       await user.save();
+      
+      return res.status(200).json({
+        message: "Usuario registrado con Google exitosamente",
+        correo,
+        nombre,
+        googleUser: true
+      });
+    }
+
+    if (user && !user.googleUser) {
+      return res.status(409).json({
+        message: "Este correo ya está registrado con método tradicional. Usa tu contraseña."
+      });
     }
 
     res.status(200).json({
-      message: user ? "Usuario ya registrado con Google" : "Usuario registrado con Google",
+      message: "Inicio de sesión con Google exitoso",
       correo,
       nombre,
+      googleUser: true
     });
 
   } catch (err) {
@@ -47,6 +62,7 @@ export const googleRegister = async (req, res) => {
   }
 };
 
+// 🔹 Registro tradicional
 export const registerUser = async (req, res) => {
   const {
     nombre,
@@ -70,6 +86,9 @@ export const registerUser = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(contraseña, salt);
+    
+    // 🔐 ENCRIPTAR LA RESPUESTA
+    const hashedRespuesta = await bcrypt.hash(respuesta.toLowerCase().trim(), salt);
 
     const codigoOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -81,19 +100,20 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
       telefono,
       pregunta_secreta,
-      respuesta,
+      respuesta: hashedRespuesta,
       codigoOTP,
-      otpExpira: new Date(Date.now() + 10 * 60 * 1000), // 10 minutos
-      confirmado: false, // Por defecto no confirmado
+      otpExpira: new Date(Date.now() + 2 * 60 * 1000),
+      confirmado: false,
     });
 
     await user.save();
-    console.log("Usuario registrado:", correo, "OTP:", codigoOTP);
+    console.log("Usuario registrado:", correo, "OTP:", codigoOTP, "Expira en 2 minutos");
 
     try {
       await sendOTPEmail(correo, codigoOTP);
-      console.log("Correo de activación enviado a:", correo);
-      return res.status(201).json({ message: "Ingresa el código para activar tu cuenta" });
+      return res.status(201).json({ 
+        message: "Ingresa el código para activar tu cuenta. El código expira en 2 minutos." 
+      });
     } catch (err) {
       console.error("Error al enviar correo de activación:", err);
       return res.status(500).json({
@@ -106,8 +126,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
-
 // 🔹 Login
 export const login = async (req, res) => {
   const { correo, contraseña } = req.body;
@@ -115,12 +133,22 @@ export const login = async (req, res) => {
   try {
     const user = await Usuario.findOne({ correo });
     if (!user) return res.status(404).json({ message: "El correo no está registrado" });
+    
+    if (user.googleUser) {
+      return res.status(422).json({ 
+        message: "Esta cuenta fue registrada con Google. Por favor inicia sesión usando Google Sign-In." 
+      });
+    }
+
     if (!user.confirmado) return res.status(403).json({ message: "Tu cuenta no está activada. Revisa tu correo." });
 
-    const passwordValida = user.googleUser
-      ? true // Usuarios Google no requieren contraseña
-      : await bcrypt.compare(contraseña, user.password);
+    if (!user.password) {
+      return res.status(422).json({ 
+        message: "Esta cuenta requiere autenticación con Google. Usa el botón de Google Sign-In." 
+      });
+    }
 
+    const passwordValida = await bcrypt.compare(contraseña, user.password);
 
     if (!passwordValida) return res.status(401).json({ message: "Contraseña incorrecta" });
 
@@ -138,7 +166,40 @@ export const login = async (req, res) => {
   }
 };
 
-// 🔹 Verificar OTP (registro o recuperación)
+// 🔐 Verificar respuesta de pregunta secreta
+export const verificarRespuestaSecreta = async (req, res) => {
+  const { correo, respuesta } = req.body;
+
+  try {
+    const user = await Usuario.findOne({ correo });
+    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    // Verificar que no sea usuario Google
+    if (user.googleUser) {
+      return res.status(422).json({ 
+        message: "Esta cuenta fue registrada con Google. Usa la opción de recuperación por correo." 
+      });
+    }
+
+    // 🔐 Verificar la respuesta encriptada
+    const respuestaValida = await bcrypt.compare(respuesta.toLowerCase().trim(), user.respuesta);
+    
+    if (!respuestaValida) {
+      return res.status(401).json({ message: "Respuesta incorrecta" });
+    }
+
+    res.status(200).json({ 
+      message: "Respuesta verificada correctamente",
+      pregunta_secreta: user.pregunta_secreta
+    });
+
+  } catch (error) {
+    console.error("Error al verificar respuesta:", error);
+    res.status(500).json({ message: "Error al verificar la respuesta" });
+  }
+};
+
+// 🔹 Verificar OTP (para registro)
 export const verificarOTP = async (req, res) => {
    const { correo, codigo } = req.body;
  
@@ -147,24 +208,29 @@ export const verificarOTP = async (req, res) => {
      if (!usuario) return res.status(404).json({ message: "Usuario no encontrado." });
  
      if (!usuario.codigoOTP) return res.status(400).json({ message: "No hay código activo. Solicita uno nuevo." });
-     if (usuario.otpExpira < new Date()) return res.status(400).json({ message: "Código expirado." });
+     
+     // Verificar si el código ha expirado (2 minutos)
+     if (usuario.otpExpira < new Date()) {
+       return res.status(400).json({ 
+         message: "Código expirado. El código OTP solo es válido por 2 minutos. Solicita uno nuevo." 
+       });
+     }
  
      if (usuario.codigoOTP !== codigo) return res.status(400).json({ message: "Código incorrecto." });
  
-     // ✅ Código correcto
      usuario.codigoOTP = undefined;
      usuario.otpExpira = undefined;
-    usuario.confirmado = true; // ✅ activamos la cuenta
+     usuario.confirmado = true;
      await usuario.save();
  
-     res.status(200).json({ message: "Código verificado correctamente." });
+     res.status(200).json({ message: "Código verificado correctamente. Cuenta activada." });
    } catch (error) {
      console.error(error);
      res.status(500).json({ message: "Error al verificar el código" });
    }
  };
 
-// 🔹 Reenviar código OTP
+// 🔹 Reenviar código OTP (para registro)
 export const reenviarCodigo = async (req, res) => {
   const { correo } = req.body;
 
@@ -172,17 +238,186 @@ export const reenviarCodigo = async (req, res) => {
     const usuario = await Usuario.findOne({ correo });
     if (!usuario) return res.status(404).json({ message: "Usuario no encontrado." });
 
-    // Generar nuevo código y actualizar expiración
     const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
     usuario.codigoOTP = nuevoCodigo;
-    usuario.otpExpira = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+    usuario.otpExpira = new Date(Date.now() + 2 * 60 * 1000);
     await usuario.save();
 
     await sendOTPEmail(correo, nuevoCodigo);
 
-    res.status(200).json({ message: "✅ Nuevo código enviado al correo" });
+    res.status(200).json({ 
+      message: "✅ Nuevo código enviado al correo. Recuerda que el código expira en 2 minutos." 
+    });
   } catch (error) {
     console.error("Error al reenviar código:", error);
     res.status(500).json({ message: "Error al reenviar el código" });
+  }
+};
+
+// ========== RECUPERACIÓN DE CONTRASEÑA ==========
+
+// 🔹 Recuperar contraseña - USA BASE DE DATOS
+export const recuperarContraseña = async (req, res) => {
+  const { correo, opcion } = req.body;
+  try {
+    const usuario = await Usuario.findOne({ correo });
+    if (!usuario)
+      return res.status(404).json({ message: "No existe un usuario con ese correo." });
+
+    // Verificar que no sea usuario Google
+    if (usuario.googleUser) {
+      return res.status(422).json({ 
+        message: "Esta cuenta fue registrada con Google. Usa la opción de inicio de sesión con Google." 
+      });
+    }
+
+    // 🔴 CORRECCIÓN: Guardar en BASE DE DATOS, no en memoria
+    const codigoOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    usuario.codigoOTP = codigoOTP;
+    usuario.otpExpira = new Date(Date.now() + 2 * 60 * 1000); // 2 minutos
+    await usuario.save();
+
+    console.log(`📧 Código de recuperación para ${correo}: ${codigoOTP}`);
+
+    if (opcion === "correo") {
+      await enviarCorreoRecuperacion(correo, codigoOTP);
+      return res.status(200).json({ 
+        message: "Código enviado al correo. Expira en 2 minutos." 
+      });
+    }
+
+    return res.status(400).json({ message: "Método de recuperación no disponible aún." });
+  } catch (error) {
+    console.error("Error en recuperarContraseña:", error);
+    res.status(500).json({ message: "Error al procesar la solicitud." });
+  }
+};
+
+// 🔹 Verificar Código Recuperación - USA BASE DE DATOS
+export const verificarCodigoRecuperacion = async (req, res) => {
+  const { correo, codigo } = req.body;
+
+  try {
+    const usuario = await Usuario.findOne({ correo });
+    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado." });
+
+    if (!usuario.codigoOTP) {
+      return res.status(400).json({ 
+        message: "No hay código activo. Solicita uno nuevo." 
+      });
+    }
+    
+    // Verificar expiración (2 minutos)
+    if (usuario.otpExpira < new Date()) {
+      // Limpiar código expirado
+      usuario.codigoOTP = undefined;
+      usuario.otpExpira = undefined;
+      await usuario.save();
+      
+      return res.status(400).json({ 
+        message: "Código expirado. El código OTP solo es válido por 2 minutos. Solicita uno nuevo." 
+      });
+    }
+
+    // 🔴 COMPARAR CON EL CÓDIGO DE LA BD
+    if (usuario.codigoOTP !== codigo) {
+      return res.status(400).json({ 
+        message: "Código incorrecto. Verifica el código e intenta nuevamente." 
+      });
+    }
+
+    // ✅ Código correcto - NO limpiar aún, esperar cambio de contraseña
+    res.status(200).json({ 
+      message: "Código verificado correctamente. Ahora puedes cambiar tu contraseña." 
+    });
+  } catch (error) {
+    console.error("Error en verificarCodigoRecuperacion:", error);
+    res.status(500).json({ message: "Error al verificar el código" });
+  }
+};
+
+// 🔹 Reenviar código Recuperación
+export const reenviarCodigoRecuperacion = async (req, res) => {
+  const { correo } = req.body;
+
+  try {
+    const usuario = await Usuario.findOne({ correo });
+    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado." });
+
+    const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
+    usuario.codigoOTP = nuevoCodigo;
+    usuario.otpExpira = new Date(Date.now() + 2 * 60 * 1000);
+    await usuario.save();
+
+    console.log(`📧 Reenvío código recuperación para ${correo}: ${nuevoCodigo}`);
+
+    await enviarCorreoRecuperacion(correo, nuevoCodigo);
+
+    res.status(200).json({ 
+      message: "✅ Nuevo código enviado al correo. Expira en 2 minutos." 
+    });
+  } catch (error) {
+    console.error("Error en reenviarCodigoRecuperacion:", error);
+    res.status(500).json({ message: "Error al reenviar el código" });
+  }
+};
+
+// 🔹 Actualizar contraseña
+export const actualizarContraseña = async (req, res) => {
+  const { correo, nuevaContraseña } = req.body;
+
+  try {
+    const usuario = await Usuario.findOne({ correo });
+    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado." });
+
+    // Verificar que no sea usuario Google
+    if (usuario.googleUser) {
+      return res.status(422).json({ 
+        message: "Esta cuenta fue registrada con Google. No puedes cambiar la contraseña manualmente." 
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(nuevaContraseña, salt);
+    usuario.password = hash;
+    
+    // Limpiar el código OTP después de cambiar contraseña
+    usuario.codigoOTP = undefined;
+    usuario.otpExpira = undefined;
+    
+    await usuario.save();
+
+    console.log(`✅ Contraseña actualizada para: ${correo}`);
+
+    res.status(200).json({ message: "Contraseña actualizada correctamente." });
+  } catch (error) {
+    console.error("Error en actualizarContraseña:", error);
+    res.status(500).json({ message: "Error al actualizar la contraseña." });
+  }
+};
+
+// 🔹 Obtener la pregunta secreta por correo
+export const obtenerPreguntaSecreta = async (req, res) => {
+  const { correo } = req.body;
+
+  try {
+    const usuario = await Usuario.findOne({ correo });
+    if (!usuario)
+      return res.status(404).json({ message: "No existe un usuario con ese correo." });
+
+    // Verificar que no sea usuario Google
+    if (usuario.googleUser) {
+      return res.status(422).json({ 
+        message: "Esta cuenta fue registrada con Google. Usa la opción de recuperación por correo." 
+      });
+    }
+
+    return res.status(200).json({
+      message: "Usuario encontrado",
+      pregunta: usuario.pregunta_secreta
+    });
+  } catch (error) {
+    console.error("Error en obtenerPreguntaSecreta:", error);
+    return res.status(500).json({ message: "Error al procesar la solicitud." });
   }
 };

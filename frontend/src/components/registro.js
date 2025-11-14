@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { FaArrowLeft, FaUserPlus } from 'react-icons/fa';
 import "../registro.css";
 import ActivarCuenta from "./ActivarCuenta";
 
@@ -34,7 +35,7 @@ const Register = () => {
     "¿Cuál es tu comida favorita?"
   ];
 
-  // Validaciones específicas para cada campo
+  // Validaciones específicas para cada campo - ACTUALIZADAS
   const validations = {
     nombre: {
       required: true,
@@ -57,10 +58,10 @@ const Register = () => {
       message: "Por favor, introduce un correo electrónico válido"
     },
     contraseña: {
-      required: true,
-      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-      message: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial"
-    },
+    required: true,
+    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]{8,}$/,
+    message: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial"
+  },
     confirmarContraseña: {
       required: true,
       validate: (value, formData) => value === formData.contraseña,
@@ -77,7 +78,8 @@ const Register = () => {
     },
     respuesta: {
       required: true,
-      message: "Por favor, proporciona una respuesta a tu pregunta secreta"
+      minLength: 2,
+      message: "Por favor, proporciona una respuesta válida (mínimo 2 caracteres)"
     }
   };
 
@@ -88,6 +90,10 @@ const Register = () => {
     
     if (validation.required && !value.trim()) {
       return "Este campo es obligatorio";
+    }
+    
+    if (validation.minLength && value && value.trim().length < validation.minLength) {
+      return `Debe tener al menos ${validation.minLength} caracteres`;
     }
     
     if (validation.pattern && value && !validation.pattern.test(value)) {
@@ -131,7 +137,6 @@ const Register = () => {
     }
   };
 
-  
   const addShakeEffect = (fieldName) => {
     const field = document.querySelector(`[name="${fieldName}"]`);
     if (field) {
@@ -216,56 +221,81 @@ const Register = () => {
 
   return (
     <div className="register-container">
+      {/* Encabezado con logo y botón de regreso */}
+      <div className="register-header">
+        <button className="back-button" onClick={() => navigate("/login")} title="Volver al Login">
+          <FaArrowLeft />
+        </button>
+        <div className="register-logo">
+          <h1>Nova Graf</h1>
+          <div className="register-subtitle">
+            <FaUserPlus className="subtitle-icon" />
+            <span>Crear Nueva Cuenta</span>
+          </div>
+        </div>
+      </div>
+
       {!correoParaActivar ? (
         <div className="form-group">
           <div className="input-group">
+            <label>Nombre *</label>
             <input 
               name="nombre" 
-              placeholder="Nombre" 
+              placeholder="Ingresa tu nombre" 
               onChange={handleChange}
               className={getFieldClassName("nombre")}
+              value={formData.nombre}
             />
             {fieldErrors.nombre && <span className="field-error">{fieldErrors.nombre}</span>}
           </div>
 
           <div className="input-group">
+            <label>Apellido Paterno *</label>
             <input 
               name="apellido_paterno" 
-              placeholder="Apellido Paterno" 
+              placeholder="Ingresa tu apellido paterno" 
               onChange={handleChange}
               className={getFieldClassName("apellido_paterno")}
+              value={formData.apellido_paterno}
             />
             {fieldErrors.apellido_paterno && <span className="field-error">{fieldErrors.apellido_paterno}</span>}
           </div>
 
           <div className="input-group">
+            <label>Apellido Materno</label>
             <input 
               name="apellido_materno" 
-              placeholder="Apellido Materno" 
+              placeholder="Ingresa tu apellido materno (opcional)" 
               onChange={handleChange}
               className={getFieldClassName("apellido_materno")}
+              value={formData.apellido_materno}
             />
             {fieldErrors.apellido_materno && <span className="field-error">{fieldErrors.apellido_materno}</span>}
           </div>
 
           <div className="input-group">
+            <label>Correo Electrónico *</label>
             <input 
               name="correo" 
-              placeholder="Correo" 
+              type="email"
+              placeholder="ejemplo@correo.com" 
               onChange={handleChange}
               className={getFieldClassName("correo")}
+              value={formData.correo}
             />
             {fieldErrors.correo && <span className="field-error">{fieldErrors.correo}</span>}
           </div>
 
           <div className="input-group">
+            <label>Contraseña *</label>
             <div className="password-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
                 name="contraseña"
-                placeholder="Contraseña"
+                placeholder="Mínimo 8 caracteres con mayúsculas, números y símbolos"
                 onChange={handleChange}
                 className={getFieldClassName("contraseña")}
+                value={formData.contraseña}
               />
               <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? "🙈" : "👁️"}
@@ -275,13 +305,15 @@ const Register = () => {
           </div>
 
           <div className="input-group">
+            <label>Confirmar Contraseña *</label>
             <div className="password-wrapper">
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmarContraseña"
-                placeholder="Confirmar Contraseña"
+                placeholder="Repite tu contraseña"
                 onChange={handleChange}
                 className={getFieldClassName("confirmarContraseña")}
+                value={formData.confirmarContraseña}
               />
               <span className="toggle-password" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                 {showConfirmPassword ? "🙈" : "👁️"}
@@ -291,22 +323,28 @@ const Register = () => {
           </div>
 
           <div className="input-group">
+            <label>Teléfono *</label>
             <input 
               name="telefono" 
-              placeholder="Teléfono" 
+              type="tel"
+              placeholder="10 dígitos (ej: 7121234567)" 
               onChange={handleChange}
               className={getFieldClassName("telefono")}
+              value={formData.telefono}
+              maxLength="10"
             />
             {fieldErrors.telefono && <span className="field-error">{fieldErrors.telefono}</span>}
           </div>
 
           <div className="input-group">
+            <label>Pregunta de Seguridad *</label>
             <select 
               name="pregunta_secreta" 
               onChange={handleChange}
               className={getFieldClassName("pregunta_secreta")}
+              value={formData.pregunta_secreta}
             >
-              <option value="">-- Selecciona tu pregunta secreta --</option>
+              <option value="">-- Selecciona una pregunta --</option>
               {preguntas.map((p, i) => (
                 <option key={i} value={p}>{p}</option>
               ))}
@@ -315,31 +353,50 @@ const Register = () => {
           </div>
 
           <div className="input-group">
+            <label>Respuesta de Seguridad *</label>
             <input 
               name="respuesta" 
-              placeholder="Respuesta" 
+              placeholder="Tu respuesta a la pregunta secreta" 
               onChange={handleChange}
               className={getFieldClassName("respuesta")}
+              value={formData.respuesta}
             />
             {fieldErrors.respuesta && <span className="field-error">{fieldErrors.respuesta}</span>}
           </div>
 
-          <button onClick={handleRegister}>Registrarse</button>
+          {message && <p className={`message ${message.includes("Error") || message.includes("corrige") ? "error" : "success"}`}>{message}</p>}
+          <button className="register-button" onClick={handleRegister}>
+            <FaUserPlus /> Crear Cuenta
+          </button>
 
           <p className="register-link">
             ¿Ya tienes cuenta?{" "}
             <span onClick={() => navigate("/login")}>Iniciar Sesión</span>
           </p>
-          <hr />
+
+           <p className="register-link">
+            Volver al inicio{" "}
+            <span onClick={() => navigate("/")}>Volver al inicio</span>
+          </p>
+
+          <div className="divider">
+            <span>Registrarse con</span>
+          </div>
           <div className="google-login-container">
-            <GoogleLogin onSuccess={handleGoogleRegister} onError={() => setMessage("Error Google Sign-In")} />
+            <GoogleLogin 
+              onSuccess={handleGoogleRegister} 
+              onError={() => setMessage("Error en Google Sign-In")}
+              text="signup_with"
+              shape="rectangular"
+              size="large"
+              width="100%"
+            />
           </div>
         </div>
       ) : (
         <ActivarCuenta correo={correoParaActivar} />
       )}
 
-      {message && <p className={`message ${message.includes("Error") ? "error" : "success"}`}>{message}</p>}
     </div>
   );
 };

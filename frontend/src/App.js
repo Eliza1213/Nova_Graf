@@ -10,13 +10,16 @@ import CambiarContraseña from "./components/CambiarContraseña";
 import RecuperarPregunta from "./components/RecuperarPregunta";
 import IngresarCorreo from "./components/IngresarCorreo";
 import ActivarCuenta from "./components/ActivarCuenta";
+import LandingPage from "./components/LandingPage";
+
 
 
 function App() {
   return (
     <div className="App">
       <Routes>
-        <Route path="/" element={<Registro />} />
+        <Route path="register/" element={<Registro />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<Home />} />
         <Route path="/recuperar" element={<RecuperarContraseña />} />

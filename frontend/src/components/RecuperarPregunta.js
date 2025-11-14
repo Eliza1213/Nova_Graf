@@ -16,7 +16,7 @@ const RecuperarPregunta = () => {
 
   const obtenerPregunta = async () => {
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/obtener-pregunta", {
+      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/obtener-pregunta-secreta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: correoRecuperacion }),

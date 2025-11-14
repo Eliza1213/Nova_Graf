@@ -11,9 +11,9 @@ import {
   FaTags,
   FaDownload,
   FaShieldAlt,
-  FaHeadset,
   FaRocket,
-  FaAward
+  FaAward,
+  FaUserCircle
 } from 'react-icons/fa';
 
 import "../Home.css";
@@ -23,15 +23,14 @@ const Home = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
   };
 
   const handlePersonalizar = () => {
-    navigate("/personalizar"); 
+    navigate("/home"); 
   };
 
   const handleServiceClick = (service) => {
-    
     console.log(`Navegando a: ${service}`);
   };
 
@@ -39,33 +38,41 @@ const Home = () => {
     <div className="full-screen-container">
       {/* Top Navigation Bar */}
       <nav className="top-nav">
-        <ul>
-          <li>Descargables</li>
-          <li>Etiqueta Empresarial</li>
-          <li>Impresión Digital</li>
-          <li>Diseño Gráfico</li>
-          <li>Contacto</li>
-        </ul>
+        <div className="nav-left">
+          <div className="logo-nav">
+            <h2>Nova Graf</h2>
+          </div>
+          <ul>
+            <li>Descargables</li>
+            <li>Etiqueta Empresarial</li>
+            <li>Impresión Digital</li>
+            <li>Diseño Gráfico</li>
+            <li>Contacto</li>
+            <li>Mi perfil</li>
+            <li>Configuración</li>
+          </ul>
+        </div>
         <div className="nav-icons">
-          <FaSearch title="Buscar" />
-          <FaUser title="Mi cuenta" />
-          <FaShoppingCart title="Carrito de compras" />
+          <FaSearch className="nav-icon-item" title="Buscar" />
+          <FaShoppingCart className="nav-icon-item" title="Carrito de compras" />
+          
+       
+          {/* Botón de Cerrar Sesión */}
+          <button className="logout-button" onClick={handleLogout} title="Cerrar Sesión">
+            <FaSignOutAlt />
+            <span>Cerrar Sesión</span>
+          </button>
         </div>
       </nav>
 
       {/* Nova Graf Bienvenido */}
       <header className="home-header">
         <div className="logo">
-          <h1>Nova Graf</h1>
-          <FaSignOutAlt 
-            className="logout-icon" 
-            onClick={handleLogout} 
-            title="Cerrar sesión"
-          />
+          <h1>Bienvenido a Nova Graf</h1>
         </div>
         
         <div className="welcome-section">
-          <h2>Bienvenido a la Revolución Gráfica</h2>
+          <h2>La Revolución Gráfica</h2>
           <p>
             Descubre un mundo de posibilidades en diseño e impresión. 
             Donde la creatividad se encuentra con la tecnología para dar vida a tus ideas.
@@ -166,7 +173,7 @@ const Home = () => {
         </div>
         
         <div className="footer-bottom">
-          <p>&copy; 2024 Nova Graf. Todos los derechos reservados.</p>
+          <p>&copy; 2025 Nova Graf. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
