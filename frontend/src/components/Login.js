@@ -233,15 +233,15 @@ const Login = () => {
           {message && <p className={`message ${message.includes("Error") || message.includes("incorrecta") || message.includes("registrado") ? "error" : "success"}`}>{message}</p>}
 
           <p className="register-link">
-            ¿Olvidaste tu contraseña? <span onClick={() => navigate("/recuperar")}>Recuperar contraseña</span>
+          <span onClick={() => navigate("/recuperar")}>  ¿Olvidaste tu contraseña?...Recuperar</span>
           </p>
        
           <p className="register-link">
-            ¿No tienes cuenta? <span onClick={() => navigate("/register")}>Regístrate aquí</span>
+           <span onClick={() => navigate("/register")}> ¿No tienes cuenta? ...Regístrate aquí</span>
           </p>
 
           <p className="register-link">
-            Volver al inicio{" "}
+           
             <span onClick={() => navigate("/")}>Volver al inicio</span>
           </p>
           <div className="google-login-container">

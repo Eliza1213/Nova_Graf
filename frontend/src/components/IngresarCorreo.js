@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { FaArrowLeft } from 'react-icons/fa';
 const IngresarCorreo = () => {
   const navigate = useNavigate();
   const [correo, setCorreo] = useState("");
   const [mensaje, setMensaje] = useState("");
   const metodo = localStorage.getItem("metodoRecuperacion");
+   
 
+const handleVolver = () => {
+    navigate("/login");
+  };  
   const handleEnviar = async (e) => {
     e.preventDefault();
     localStorage.setItem("correoRecuperacion", correo);
@@ -42,7 +46,16 @@ const IngresarCorreo = () => {
         />
         <button type="submit">Continuar</button>
       </form>
+      
       {mensaje && <p>{mensaje}</p>}
+
+      <div className="volver-link">
+        <span onClick={handleVolver}>
+          <FaArrowLeft style={{ marginRight: '8px' }} />
+          Volver al inicio de sesión
+        </span>
+      </div>
+
     </div>
   );
 };

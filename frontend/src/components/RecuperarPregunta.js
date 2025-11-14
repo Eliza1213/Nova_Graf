@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from 'react-icons/fa';
 
 const RecuperarPregunta = () => {
   const navigate = useNavigate();
@@ -8,6 +9,10 @@ const RecuperarPregunta = () => {
   const [pregunta, setPregunta] = useState("");
   const [respuesta, setRespuesta] = useState("");
   const [mensaje, setMensaje] = useState("");
+
+  const handleVolver = () => {
+    navigate("/login");
+  };
 
   useEffect(() => {
     if (!correoRecuperacion) navigate("/recuperar"); // Si no hay correo, regresar
@@ -68,8 +73,15 @@ const RecuperarPregunta = () => {
       ) : (
         <p>Obteniendo pregunta...</p>
       )}
-
+      
       {mensaje && <p>{mensaje}</p>}
+        <div className="volver-link">
+                <span onClick={handleVolver}>
+                  <FaArrowLeft style={{ marginRight: '8px' }} />
+                  Volver al inicio de sesión
+                </span>
+              </div>
+      
     </div>
   );
 };

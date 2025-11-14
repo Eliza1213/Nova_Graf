@@ -370,12 +370,10 @@ const Register = () => {
           </button>
 
           <p className="register-link">
-            ¿Ya tienes cuenta?{" "}
-            <span onClick={() => navigate("/login")}>Iniciar Sesión</span>
+            <span onClick={() => navigate("/login")}> ¿Ya tienes cuenta?....Iniciar Sesión</span>
           </p>
 
            <p className="register-link">
-            Volver al inicio{" "}
             <span onClick={() => navigate("/")}>Volver al inicio</span>
           </p>
 
