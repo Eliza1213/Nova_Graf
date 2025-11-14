@@ -22,7 +22,7 @@ router.post("/verificar-otp", verificarOTP);
 // Login
 router.post("/login", login);
 // 🔹 Recuperación de contraseña (envía código OTP al correo)
-router.post("/recuperar-contraseña", recuperarContraseña);
+router.post("/recuperar-contrasenia", recuperarContraseña);
 
 // 🔹 Verificación del código OTP recibido por correo
 router.post("/verificar-codigo-recuperacion", verificarCodigoRecuperacion);
