@@ -20,7 +20,7 @@ const IngresarCorreo = () => {
         });
         const data = await res.json();
         setMensaje(data.message);
-        if (res.status === 200) navigate("https://novagraf-production.up.railway.app/api/verificar-codigo-recuperacion");
+        if (res.status === 200) navigate("/verificar-codigo");
       } catch (err) {
         setMensaje("Error al enviar el código.");
       }
