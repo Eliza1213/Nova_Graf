@@ -232,12 +232,10 @@ const Login = () => {
 
           {message && <p className={`message ${message.includes("Error") || message.includes("incorrecta") || message.includes("registrado") ? "error" : "success"}`}>{message}</p>}
 
-          {showRecoveryOption && (
-            <p className="recovery-link">
-              <span onClick={() => navigate("/recuperar")}>Recuperar contraseña</span>
-            </p>
-          )}
-
+          <p className="register-link">
+            ¿Olvidaste tu contraseña? <span onClick={() => navigate("/recuperar")}>Recuperar contraseña</span>
+          </p>
+       
           <p className="register-link">
             ¿No tienes cuenta? <span onClick={() => navigate("/register")}>Regístrate aquí</span>
           </p>

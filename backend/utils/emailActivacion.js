@@ -15,7 +15,7 @@ export const enviarCorreoActivacion = async (correo, codigoOTP) => {
       <h2>Bienvenido a NovaGraf</h2>
       <p>Tu código de activación es:</p>
       <h3>${codigoOTP}</h3>
-      <p>Ingresa este código en la app para activar tu cuenta. Expira en 10 minutos.</p>
+      <p>Ingresa este código en la app para activar tu cuenta. Expira en 2 minutos.</p>
     `,
   };
 

@@ -9,7 +9,7 @@ const VerificarCodigo = () => {
   const [reenviando, setReenviando] = useState(false);
   const [verificando, setVerificando] = useState(false);
   const [error, setError] = useState("");
-  const [tiempoRestante, setTiempoRestante] = useState(300); // 5 minutos en segundos
+  const [tiempoRestante, setTiempoRestante] = useState(120); // 5 minutos en segundos
   const correo = localStorage.getItem("correoRecuperacion");
 
   // Contador de tiempo
@@ -124,7 +124,7 @@ const VerificarCodigo = () => {
       
       if (res.status === 200) {
         setMensaje("✅ Código reenviado correctamente. Revisa tu correo.");
-        setTiempoRestante(300); // Reiniciar contador a 5 minutos
+        setTiempoRestante(120); // Reiniciar contador a 5 minutos
       } else {
         setMensaje(data.message || "❌ Error al reenviar el código");
       }
@@ -189,11 +189,12 @@ const VerificarCodigo = () => {
       <button
         type="button"
         onClick={handleReenviarCodigo}
-        disabled={reenviando || tiempoRestante > 120} // Solo permitir reenviar si quedan menos de 2 minutos
+        disabled={reenviando || tiempoRestante > 60} // Solo permitir reenviar si quedan menos de 2 minutos
         className="reenviar-btn"
       >
-        {reenviando ? "Reenviando..." : "Reenviar Código"}
+        {reenviando ? "Reenviando..." : tiempoRestante > 60 ? "Esperar para reenviar" : "Reenviar Código"}
       </button>
+
 
       {mensaje && (
         <p className={`mensaje ${mensaje.includes("✅") ? "success" : "error"}`}>

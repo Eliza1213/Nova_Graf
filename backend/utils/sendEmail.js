@@ -15,7 +15,7 @@ export const sendOTPEmail = async (correo, codigoOTP) => {
       html: `<h2>Bienvenido a NovaGraf</h2>
              <p>Tu código de verificación es:</p>
              <h3>${codigoOTP}</h3>
-             <p>Expira en 10 minutos.</p>`,
+             <p>Expira en 2 minutos.</p>`,
     };
     await sgMail.send(msg);
     console.log("Correo de activación enviado a:", correo);

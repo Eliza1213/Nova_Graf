@@ -15,7 +15,7 @@ export const enviarCorreoRecuperacion = async (correo, codigoOTP) => {
       <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
       <p>Tu código de verificación es:</p>
       <h3>${codigoOTP}</h3>
-      <p>Este código expira en 10 minutos.</p>
+      <p>Este código expira en 2 minutos.</p>
       <p>Si no solicitaste este cambio, ignora este mensaje.</p>
     `,
   };
