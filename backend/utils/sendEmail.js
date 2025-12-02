@@ -1,6 +1,6 @@
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY.trim());
 
 export const sendOTPEmail = async (correo, codigoOTP) => {
   // Generar identificadores únicos
