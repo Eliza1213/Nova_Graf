@@ -127,13 +127,20 @@ export const registerUser = async (req, res) => {
 };
 
 // 🔹 Login
+// 🔹 Login con bloqueo por intentos fallidos
 export const login = async (req, res) => {
   const { correo, contraseña } = req.body;
 
   try {
     const user = await Usuario.findOne({ correo });
     if (!user) return res.status(404).json({ message: "El correo no está registrado" });
-    
+
+    // Verificar si la cuenta está bloqueada
+    if (user.bloqueadoHasta && user.bloqueadoHasta > new Date()) {
+      const tiempoRestante = Math.ceil((user.bloqueadoHasta - new Date()) / 1000); // En segundos
+      return res.status(403).json({ message: `Cuenta bloqueada. Intenta nuevamente en ${tiempoRestante} segundos.` });
+    }
+
     if (user.googleUser) {
       return res.status(422).json({ 
         message: "Esta cuenta fue registrada con Google. Por favor inicia sesión usando Google Sign-In." 
@@ -150,7 +157,25 @@ export const login = async (req, res) => {
 
     const passwordValida = await bcrypt.compare(contraseña, user.password);
 
-    if (!passwordValida) return res.status(401).json({ message: "Contraseña incorrecta" });
+    if (!passwordValida) {
+      // Incrementar los intentos fallidos
+      user.intentosFallidos += 1;
+
+      // Si ha fallado 3 veces, bloquear la cuenta por 15 minutos
+      if (user.intentosFallidos >= 3) {
+        user.bloqueadoHasta = new Date(Date.now() + 15 * 60 * 1000); // Bloquear 15 minutos
+      }
+
+      await user.save();
+
+      return res.status(401).json({ message: "Contraseña incorrecta" });
+    }
+
+    // Si la contraseña es correcta, resetear los intentos fallidos
+    user.intentosFallidos = 0;
+    user.bloqueadoHasta = null; // Asegurarse de que la cuenta no esté bloqueada
+
+    await user.save();
 
     res.status(200).json({
       message: `Bienvenido ${user.nombre}!`,
@@ -165,6 +190,7 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
 
 // 🔐 Verificar respuesta de pregunta secreta
 export const verificarRespuestaSecreta = async (req, res) => {
