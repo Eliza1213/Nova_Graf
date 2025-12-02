@@ -56,7 +56,7 @@ const ActivarCuenta = ({ correo }) => {
 
     setIsLoading(true);
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/verificar-otp", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/verificar-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, codigo: codigoOTP }),
@@ -83,7 +83,7 @@ const ActivarCuenta = ({ correo }) => {
   const handleReenviarOTP = async () => {
     setIsResending(true);
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/reenviar-codigo", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/reenviar-codigo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo }),

@@ -21,7 +21,7 @@ const RecuperarPregunta = () => {
 
   const obtenerPregunta = async () => {
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/obtener-pregunta-secreta", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/obtener-pregunta-secreta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: correoRecuperacion }),
@@ -40,7 +40,7 @@ const RecuperarPregunta = () => {
 
   const handleVerificarRespuesta = async () => {
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/verificar-respuesta", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/verificar-respuesta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: correoRecuperacion, respuesta }),

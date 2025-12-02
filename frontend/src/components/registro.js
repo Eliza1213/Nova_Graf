@@ -161,7 +161,7 @@ const Register = () => {
 
     // Si la validación es exitosa, proceder con el registro
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/register", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -190,7 +190,7 @@ const Register = () => {
     }
 
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/google-register", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/google-register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: credentialResponse.credential }),

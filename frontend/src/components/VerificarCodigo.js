@@ -83,7 +83,7 @@ const VerificarCodigo = () => {
     console.log("Enviando:", { correo, codigo });
 
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/verificar-codigo-recuperacion", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/verificar-codigo-recuperacion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, codigo }),
@@ -114,7 +114,7 @@ const VerificarCodigo = () => {
     setError("");
 
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/reenviar-codigo-recuperacion", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/reenviar-codigo-recuperacion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo }),

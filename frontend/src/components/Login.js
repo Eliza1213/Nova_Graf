@@ -100,7 +100,7 @@ const Login = () => {
 
     // Lógica original de login
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/login", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -142,7 +142,7 @@ const Login = () => {
     }
 
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/verificar-otp", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/verificar-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: formData.correo, codigo: codigoOTP }),
@@ -163,7 +163,7 @@ const Login = () => {
   // Login con Google
   const handleGoogleLogin = async (credentialResponse) => {
     try {
-      const res = await fetch("https://novagraf-production.up.railway.app/api/auth/google-register", {
+      const res = await fetch("https://nova-graf.onrender.com/api/auth/google-register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: credentialResponse.credential }),
