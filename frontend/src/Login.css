@@ -1,116 +1,150 @@
-/* Login.css - Diseño Responsivo Compacto en Altura */
+/* Login.css - Diseño Moderno y Responsivo */
 
-/* Variables CSS para mantener consistencia */
+/* Variables CSS */
 :root {
-  --primary-color: #2e7d32;
-  --primary-dark: #1b5e20;
-  --primary-light: #4caf50;
-  --error-color: #c62828;
-  --success-color: #2e7d32;
-  --text-color: #212121;
-  --text-light: #757575;
-  --light-gray: #f5f5f5;
-  --border-color: #e0e0e0;
-  --border-dark: #bdbdbd;
-  --background-dark: #121212;
-  --border-radius: 6px;
-  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --transition: all 0.3s ease;
+  --primary-color: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #3b82f6;
+  --error-color: #dc2626;
+  --success-color: #16a34a;
+  --warning-color: #f59e0b;
+  --text-color: #1f2937;
+  --text-light: #6b7280;
+  --light-gray: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --border-color: #d1d5db;
+  --background-dark: #111827;
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --box-shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --transition: all 0.2s ease;
 }
 
-/* Estilos base */
+/* Reset y estilos base */
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(135deg, #f5f5f5 0%, #126419 100%);
-  color: var(--text-color);
-  line-height: 1.4;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-}
-
-/* Contenedor principal - REDUCIDO EN ALTURA */
-.login-container {
-  max-width: 450px;
-  width: 90%;
-  margin: 1.2rem auto;
-  padding: 1.5rem;
-  background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  border: 1px solid var(--border-color);
-}
-
-/* Título - MÁS COMPACTO */
-.login-container h2 {
-  margin-top: 0;
-  margin-bottom: 0.8rem;
-  font-size: 1.6rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
   color: var(--text-color);
+  line-height: 1.5;
+}
+
+/* Contenedor principal */
+.login-container {
+  width: 100%;
+  max-width: 440px;
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-lg);
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto decorativo superior */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+}
+
+/* Título */
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-color);
+  font-size: 1.75rem;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Estilos del formulario - ESPACIADO REDUCIDO */
+/* Grupos de formulario */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 1.5rem;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
-/* Labels - MÁS PEQUEÑOS */
-.input-group .register-link {
+/* Labels */
+.input-label {
   font-weight: 600;
   color: var(--text-color);
-  margin-bottom: 0.15rem;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  display: block;
+  margin-bottom: 0.25rem;
 }
 
-/* Estilos para inputs - MÁS COMPACTOS EN ALTURA */
+/* Inputs */
 input {
   width: 100%;
-  padding: 0.6rem 0.85rem;
-  border: 2px solid var(--border-color);
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--gray-200);
   border-radius: var(--border-radius);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   transition: var(--transition);
   background-color: white;
   color: var(--text-color);
+  font-family: inherit;
 }
 
 input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   transform: translateY(-1px);
 }
 
-/* Estilos para campos válidos */
+input::placeholder {
+  color: var(--text-light);
+  opacity: 0.7;
+}
+
+/* Estados de validación */
 input.valid {
   border-color: var(--success-color);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2316a34a'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
 }
 
-/* Estilos para campos con error */
 input.error {
   border-color: var(--error-color);
-  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23dc2626'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
 }
 
-/* Contenedor para campo de contraseña */
+/* Contenedor de contraseña */
 .password-wrapper {
   position: relative;
   display: flex;
@@ -118,60 +152,72 @@ input.error {
 }
 
 .password-wrapper input {
-  padding-right: 2.6rem;
+  padding-right: 3rem;
 }
 
 .toggle-password {
   position: absolute;
   right: 0.75rem;
-  cursor: pointer;
-  user-select: none;
-  font-size: 1rem;
-  color: var(--text-light);
-  transition: var(--transition);
   background: none;
   border: none;
-  padding: 0.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
   border-radius: 50%;
+  color: var(--text-light);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
 }
 
 .toggle-password:hover {
   color: var(--primary-color);
-  background-color: rgba(46, 125, 50, 0.1);
+  background-color: var(--gray-100);
 }
 
-/* Botón de login - MÁS COMPACTO */
-button {
-  padding: 0.7rem 1.2rem;
+.toggle-password:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Botón principal */
+button[type="button"] {
+  width: 100%;
+  padding: 1rem;
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   color: white;
   border: none;
   border-radius: var(--border-radius);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
-  margin-top: 0.2rem;
-  width: 100%;
-  letter-spacing: 0.5px;
+  margin-top: 0.5rem;
+  letter-spacing: 0.025em;
 }
 
-button:hover {
+button[type="button"]:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
 }
 
-button:active {
+button[type="button"]:active {
   transform: translateY(0);
 }
 
-/* Enlaces - MÁS COMPACTOS */
+button[type="button"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Enlaces */
 .register-link {
   text-align: center;
-  margin-top: 0.6rem;
-  color: var(--text-color);
-  font-size: 0.85rem;
-  line-height: 1.3;
+  margin-top: 0.5rem;
+  color: var(--text-light);
+  font-size: 0.875rem;
 }
 
 .register-link span {
@@ -179,263 +225,122 @@ button:active {
   cursor: pointer;
   font-weight: 600;
   transition: var(--transition);
-  padding: 0.15rem 0.4rem;
+  text-decoration: none;
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
   border-radius: 4px;
 }
 
 .register-link span:hover {
-  text-decoration: underline;
   color: var(--primary-dark);
-  background-color: rgba(46, 125, 50, 0.1);
-}
-
-/* Enlace de recuperación */
-.recovery-link {
-  text-align: center;
-  margin-top: 0.6rem;
-}
-
-.recovery-link span {
-  color: var(--primary-color);
-  cursor: pointer;
-  font-weight: 600;
-  transition: var(--transition);
-  font-size: 0.85rem;
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-}
-
-.recovery-link span:hover {
+  background-color: rgba(37, 99, 235, 0.1);
   text-decoration: underline;
-  color: var(--primary-dark);
-  background-color: rgba(46, 125, 50, 0.1);
 }
 
-/* Mensajes del sistema - MÁS COMPACTOS */
+/* Mensajes */
 .message {
-  padding: 0.7rem 1rem;
+  padding: 1rem;
   border-radius: var(--border-radius);
-  margin-top: 0.6rem;
+  margin-top: 1rem;
   text-align: center;
   font-weight: 500;
-  font-size: 0.85rem;
-  line-height: 1.3;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .message.error {
-  background-color: rgba(198, 40, 40, 0.08);
+  background-color: #fef2f2;
   color: var(--error-color);
-  border: 1px solid var(--error-color);
+  border: 1px solid #fecaca;
 }
 
 .message.success {
-  background-color: rgba(46, 125, 50, 0.08);
+  background-color: #f0fdf4;
   color: var(--success-color);
-  border: 1px solid var(--success-color);
+  border: 1px solid #bbf7d0;
 }
 
-/* Estilos para mensajes de error de campo */
+.message.warning {
+  background-color: #fffbeb;
+  color: var(--warning-color);
+  border: 1px solid #fde68a;
+}
+
+/* Errores de campo */
 .field-error {
   color: var(--error-color);
   font-size: 0.75rem;
-  margin-top: 0.2rem;
+  margin-top: 0.25rem;
   display: block;
   font-weight: 500;
-  padding-left: 0.5rem;
+  padding-left: 0.25rem;
+  animation: shake 0.4s ease;
 }
 
-/* Contenedor para OTP */
+/* Contenedor OTP */
 .otp-container {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 1.5rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.otp-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .otp-container input {
   text-align: center;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  letter-spacing: 2px;
+  letter-spacing: 4px;
+  padding: 1rem;
 }
 
-/* Estilos para el botón de Google - MÁS COMPACTO */
+/* Google Login */
 .google-login-container {
   display: flex;
   justify-content: center;
-  margin-top: 0.8rem;
-  padding-top: 0.8rem;
-  border-top: 1px solid var(--border-color);
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--gray-200);
 }
 
-/* Ajustes para el botón de Google */
-.google-login-container > div {
-  transform: scale(0.95);
-  transform-origin: center;
-}
-
-/* Placeholders más claros */
-::placeholder {
+/* Separador */
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
   color: var(--text-light);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
 }
 
-/* Estilo para cuando el campo está deshabilitado */
-input:disabled {
-  background-color: var(--light-gray);
-  color: var(--text-light);
-  cursor: not-allowed;
-  opacity: 0.7;
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--gray-200);
 }
 
-/* Efectos de transición suaves para todos los elementos interactivos */
-input, button, .toggle-password {
-  transition: var(--transition);
+.separator span {
+  padding: 0 1rem;
 }
 
-/* Estilo para el enfoque de accesibilidad */
-button:focus, input:focus {
-  outline: 2px solid var(--primary-light);
-  outline-offset: 2px;
-}
-
-/* ========== RESPONSIVE DESIGN ========== */
-
-/* Laptop (1024px - 1440px) */
-@media (min-width: 1024px) {
-  .login-container {
-    max-width: 480px;
-    margin: 2rem auto;
-    padding: 1.8rem;
-  }
-  
-  .login-container h2 {
-    font-size: 1.7rem;
-    margin-bottom: 1rem;
-  }
-  
-  input {
-    padding: 0.7rem 1rem;
-    font-size: 0.95rem;
-  }
-  
-  button {
-    padding: 0.8rem 1.2rem;
-    font-size: 0.95rem;
-  }
-}
-
-/* Tablet (768px - 1023px) */
-@media (max-width: 1023px) and (min-width: 768px) {
-  .login-container {
-    max-width: 500px;
-    margin: 1.8rem auto;
-    padding: 1.8rem;
-  }
-  
-  body {
-    padding: 1rem;
-  }
-}
-
-/* Móvil Grande (481px - 767px) */
-@media (max-width: 767px) and (min-width: 481px) {
-  .login-container {
-    width: 95%;
-    margin: 1rem auto;
-    padding: 1.5rem;
-  }
-  
-  .form-group {
-    gap: 0.6rem;
-  }
-  
-  .login-container h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.7rem;
-  }
-  
-  input, button {
-    font-size: 0.9rem;
-  }
-}
-
-/* Móvil Pequeño (320px - 480px) */
-@media (max-width: 480px) {
-  body {
-    padding: 0.8rem;
-    align-items: flex-start;
-    background: white;
-  }
-  
-  .login-container {
-    width: 100%;
-    margin: 0;
-    padding: 1.2rem;
-    box-shadow: none;
-    border: none;
-    border-radius: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  
-  .form-group {
-    gap: 0.6rem;
-  }
-  
-  .login-container h2 {
-    font-size: 1.4rem;
-    margin-bottom: 0.7rem;
-  }
-  
-  input {
-    padding: 0.6rem;
-    font-size: 0.85rem;
-  }
-  
-  button {
-    padding: 0.7rem;
-    font-size: 0.85rem;
-  }
-  
-  .register-link, .message, .recovery-link span {
-    font-size: 0.8rem;
-  }
-  
-  .google-login-container {
-    margin-top: 0.7rem;
-    padding-top: 0.7rem;
-  }
-}
-
-/* Móvil Muy Pequeño (hasta 320px) */
-@media (max-width: 320px) {
-  body {
-    padding: 0.5rem;
-  }
-  
-  .login-container {
-    padding: 1rem;
-  }
-  
-  input, button {
-    padding: 0.55rem;
-    font-size: 0.8rem;
-  }
-  
-  .login-container h2 {
-    font-size: 1.2rem;
-    margin-bottom: 0.6rem;
-  }
-  
-  .toggle-password {
-    right: 0.6rem;
-    font-size: 0.95rem;
-  }
-}
-
-/* Animaciones para mejorar la experiencia de usuario */
+/* Animación de shake */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
@@ -446,40 +351,95 @@ button:focus, input:focus {
   animation: shake 0.4s ease-in-out;
 }
 
-/* Efecto de carga para botones */
-@keyframes button-loading {
-  0% { opacity: 0.7; }
-  50% { opacity: 1; }
-  100% { opacity: 0.7; }
+/* Animación fadeIn */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.button-loading {
-  animation: button-loading 1.5s ease-in-out infinite;
-  pointer-events: none;
-}
-
-/* Mejoras para modo oscuro (opcional) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text-color: #e0e0e0;
-    --text-light: #aaaaaa;
-    --light-gray: #2a2a2a;
-    --border-color: #444444;
-    --border-dark: #555555;
+/* Responsive */
+@media (max-width: 640px) {
+  body {
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
   
   .login-container {
-    background-color: #1e1e1e;
+    padding: 2rem 1.5rem;
+    border-radius: var(--border-radius);
+  }
+  
+  .login-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group {
+    gap: 1.25rem;
+  }
+  
+  input {
+    padding: 0.75rem 0.875rem;
+  }
+  
+  button[type="button"] {
+    padding: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 1.75rem 1.25rem;
+  }
+  
+  .login-container h2 {
+    font-size: 1.375rem;
+  }
+  
+  .register-link {
+    font-size: 0.8125rem;
+  }
+  
+  .message {
+    font-size: 0.8125rem;
+    padding: 0.875rem;
+  }
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-color: #f3f4f6;
+    --text-light: #9ca3af;
+    --light-gray: #1f2937;
+    --gray-100: #111827;
+    --gray-200: #374151;
+    --gray-300: #4b5563;
+  }
+  
+  .login-container {
+    background-color: var(--gray-100);
     color: var(--text-color);
   }
   
   input {
-    background-color: #2a2a2a;
+    background-color: var(--gray-200);
     color: var(--text-color);
-    border-color: var(--border-color);
+    border-color: var(--gray-300);
   }
   
   input:focus {
     border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+  
+  .message.error {
+    background-color: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.3);
+  }
+  
+  .message.success {
+    background-color: rgba(22, 163, 74, 0.1);
+    border-color: rgba(22, 163, 74, 0.3);
   }
 }
