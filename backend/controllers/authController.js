@@ -134,22 +134,33 @@ export const login = async (req, res) => {
     const user = await Usuario.findOne({ correo });
     if (!user) return res.status(404).json({ message: "El correo no está registrado" });
 
-    // Verificar si la cuenta está bloqueada
+    // ⏱️ Verificar si la cuenta está bloqueada temporalmente
     if (user.bloqueadoHasta && user.bloqueadoHasta > new Date()) {
-      const tiempoRestante = Math.ceil((user.bloqueadoHasta - new Date()) / 1000); // segundos restantes
+      const tiempoRestante = Math.ceil((user.bloqueadoHasta - new Date()) / 60000); // minutos
       return res.status(403).json({ 
-        message: `Tu cuenta está bloqueada. Intenta de nuevo en ${tiempoRestante} segundos.` 
+        message: `Tu cuenta ha sido bloqueada. Intenta de nuevo en ${tiempoRestante} minuto${tiempoRestante > 1 ? 's' : ''}.` 
       });
     }
 
-    // Si la cuenta no está bloqueada, proceder con la validación de contraseña
+    // Limpiar bloqueo si ya expiró
+    if (user.bloqueadoHasta && user.bloqueadoHasta <= new Date()) {
+      user.bloqueadoHasta = null;
+      user.intentosFallidos = 0;
+    }
+
+    // Verificar si es usuario de Google
     if (user.googleUser) {
       return res.status(422).json({ 
         message: "Esta cuenta fue registrada con Google. Por favor inicia sesión usando Google Sign-In." 
       });
     }
 
-    if (!user.confirmado) return res.status(403).json({ message: "Tu cuenta no está activada. Revisa tu correo." });
+    // Verificar si la cuenta está activada (solo para cuentas nuevas que aún no confirmaron)
+    if (!user.confirmado) {
+      return res.status(403).json({ 
+        message: "Tu cuenta no está activada. Revisa tu correo para activarla." 
+      });
+    }
 
     if (!user.password) {
       return res.status(422).json({ 
@@ -157,24 +168,41 @@ export const login = async (req, res) => {
       });
     }
 
+    // Validar contraseña
     const passwordValida = await bcrypt.compare(contraseña, user.password);
 
     if (!passwordValida) {
-      user.intentosFallidos += 1;
-      
-      if (user.intentosFallidos >= 3) {
-        // Bloquear la cuenta por 10 minutos (600,000 ms)
-        user.bloqueadoHasta = new Date(Date.now() + 600000);
+      user.intentosFallidos = (user.intentosFallidos || 0) + 1;
+
+      // 1er intento fallido
+      if (user.intentosFallidos === 1) {
         await user.save();
-        return res.status(403).json({ message: "Has excedido el número de intentos. Tu cuenta está bloqueada temporalmente." });
+        return res.status(401).json({ 
+          message: "Contraseña incorrecta. ¿Deseas recuperar tu contraseña?" 
+        });
       }
 
-      await user.save();
-      return res.status(401).json({ message: "Contraseña incorrecta" });
+      // 2do intento fallido
+      if (user.intentosFallidos === 2) {
+        await user.save();
+        return res.status(401).json({ 
+          message: "Contraseña incorrecta. Te queda 1 intento más." 
+        });
+      }
+
+      // 3er intento fallido → Bloquear por 5 minutos
+      if (user.intentosFallidos >= 3) {
+        user.bloqueadoHasta = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
+        await user.save();
+        return res.status(403).json({ 
+          message: "Tu cuenta ha sido bloqueada. Intenta de nuevo en 5 minutos." 
+        });
+      }
     }
 
-    // Si la contraseña es válida, reiniciar los intentos fallidos
+    // ✅ Contraseña correcta → Resetear intentos y desbloquear
     user.intentosFallidos = 0;
+    user.bloqueadoHasta = null;
     await user.save();
 
     res.status(200).json({
@@ -185,6 +213,7 @@ export const login = async (req, res) => {
         nombre: user.nombre,
       },
     });
+
   } catch (error) {
     console.error("Error en login:", error);
     res.status(500).json({ message: "Error en el servidor" });
