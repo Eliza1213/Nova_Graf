@@ -126,7 +126,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// 🔹 Login con bloqueo por intentos fallidos
+// 🔹 Login con bloqueo temporal por intentos fallidos
 export const login = async (req, res) => {
   const { correo, contraseña } = req.body;
 
@@ -134,66 +134,73 @@ export const login = async (req, res) => {
     const user = await Usuario.findOne({ correo });
     if (!user) return res.status(404).json({ message: "El correo no está registrado" });
 
-    // ✅ PRIMERO: Verificar si es usuario de Google
+    // Verificar si es usuario de Google
     if (user.googleUser) {
       return res.status(422).json({ 
         message: "Esta cuenta fue registrada con Google. Por favor inicia sesión usando Google Sign-In." 
       });
     }
 
-    // ✅ SEGUNDO: Verificar si la cuenta está confirmada
+    // Verificar si la cuenta está confirmada (activada con OTP)
     if (!user.confirmado) {
       return res.status(403).json({ 
         message: "Tu cuenta no está activada. Revisa tu correo para el código de verificación." 
       });
     }
 
-    // ✅ TERCERO: Verificar si la cuenta está bloqueada TEMPORALMENTE
+    // ⏱️ BLOQUEO TEMPORAL: Verificar si está bloqueada por intentos fallidos
     if (user.bloqueadoHasta && user.bloqueadoHasta > new Date()) {
-      const tiempoRestante = Math.ceil((user.bloqueadoHasta - new Date()) / 60000); // En minutos
+      const tiempoRestante = Math.ceil((user.bloqueadoHasta - new Date()) / 60000); // minutos
       return res.status(403).json({ 
-        message: `Cuenta bloqueada temporalmente por intentos fallidos. Intenta nuevamente en ${tiempoRestante} minutos.` 
+        message: `Cuenta bloqueada temporalmente por múltiples intentos fallidos. Podrás intentar nuevamente en ${tiempoRestante} minuto${tiempoRestante > 1 ? 's' : ''}.` 
       });
     }
 
-    // ✅ CUARTO: Verificar que tenga contraseña (no debería pasar si ya verificamos googleUser)
+    // Si el bloqueo ya expiró, limpiar automáticamente
+    if (user.bloqueadoHasta && user.bloqueadoHasta <= new Date()) {
+      user.bloqueadoHasta = null;
+      user.intentosFallidos = 0;
+      await user.save();
+    }
+
     if (!user.password) {
       return res.status(422).json({ 
         message: "Esta cuenta requiere autenticación con Google. Usa el botón de Google Sign-In." 
       });
     }
 
-    // ✅ QUINTO: Validar la contraseña
+    // Validar contraseña
     const passwordValida = await bcrypt.compare(contraseña, user.password);
 
     if (!passwordValida) {
-      // Incrementar los intentos fallidos
+      // Incrementar intentos fallidos
       user.intentosFallidos = (user.intentosFallidos || 0) + 1;
 
-      // Si ha fallado 3 veces, bloquear la cuenta por 15 minutos
+      // 🔒 Si llega a 3 intentos → BLOQUEO TEMPORAL de 15 minutos
       if (user.intentosFallidos >= 3) {
-        user.bloqueadoHasta = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+        user.bloqueadoHasta = new Date(Date.now() + 15 * 60 * 1000);
         await user.save();
         
         return res.status(403).json({ 
-          message: "Has superado el límite de intentos. Tu cuenta ha sido bloqueada temporalmente por 15 minutos." 
+          message: "Has excedido el límite de intentos permitidos. Tu cuenta ha sido bloqueada temporalmente por 15 minutos por seguridad." 
         });
       }
 
       await user.save();
-
+      
+      const intentosRestantes = 3 - user.intentosFallidos;
       return res.status(401).json({ 
-        message: `Contraseña incorrecta. Te quedan ${3 - user.intentosFallidos} intentos.` 
+        message: `Contraseña incorrecta. Te ${intentosRestantes === 1 ? 'queda' : 'quedan'} ${intentosRestantes} intento${intentosRestantes > 1 ? 's' : ''}.` 
       });
     }
 
-    // ✅ Si la contraseña es correcta, resetear los intentos fallidos y desbloquear
+    // ✅ Contraseña correcta → Limpiar bloqueo y resetear intentos
     user.intentosFallidos = 0;
     user.bloqueadoHasta = null;
     await user.save();
 
     res.status(200).json({
-      message: `Bienvenido ${user.nombre}!`,
+      message: `¡Bienvenido ${user.nombre}!`,
       usuario: {
         id: user._id,
         correo: user.correo,
@@ -205,7 +212,6 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
-
 
 // 🔐 Verificar respuesta de pregunta secreta
 export const verificarRespuestaSecreta = async (req, res) => {
