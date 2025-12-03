@@ -126,7 +126,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// 🔹 Login
 // 🔹 Login con bloqueo por intentos fallidos
 export const login = async (req, res) => {
   const { correo, contraseña } = req.body;
@@ -135,46 +134,62 @@ export const login = async (req, res) => {
     const user = await Usuario.findOne({ correo });
     if (!user) return res.status(404).json({ message: "El correo no está registrado" });
 
-    // Verificar si la cuenta está bloqueada
-    if (user.bloqueadoHasta && user.bloqueadoHasta > new Date()) {
-      const tiempoRestante = Math.ceil((user.bloqueadoHasta - new Date()) / 1000); // En segundos
-      return res.status(403).json({ message: `Cuenta bloqueada. Intenta nuevamente en ${tiempoRestante} segundos.` });
-    }
-
+    // ✅ PRIMERO: Verificar si es usuario de Google
     if (user.googleUser) {
       return res.status(422).json({ 
         message: "Esta cuenta fue registrada con Google. Por favor inicia sesión usando Google Sign-In." 
       });
     }
 
-    if (!user.confirmado) return res.status(403).json({ message: "Tu cuenta no está activada. Revisa tu correo." });
+    // ✅ SEGUNDO: Verificar si la cuenta está confirmada
+    if (!user.confirmado) {
+      return res.status(403).json({ 
+        message: "Tu cuenta no está activada. Revisa tu correo para el código de verificación." 
+      });
+    }
 
+    // ✅ TERCERO: Verificar si la cuenta está bloqueada TEMPORALMENTE
+    if (user.bloqueadoHasta && user.bloqueadoHasta > new Date()) {
+      const tiempoRestante = Math.ceil((user.bloqueadoHasta - new Date()) / 60000); // En minutos
+      return res.status(403).json({ 
+        message: `Cuenta bloqueada temporalmente por intentos fallidos. Intenta nuevamente en ${tiempoRestante} minutos.` 
+      });
+    }
+
+    // ✅ CUARTO: Verificar que tenga contraseña (no debería pasar si ya verificamos googleUser)
     if (!user.password) {
       return res.status(422).json({ 
         message: "Esta cuenta requiere autenticación con Google. Usa el botón de Google Sign-In." 
       });
     }
 
+    // ✅ QUINTO: Validar la contraseña
     const passwordValida = await bcrypt.compare(contraseña, user.password);
 
     if (!passwordValida) {
       // Incrementar los intentos fallidos
-      user.intentosFallidos += 1;
+      user.intentosFallidos = (user.intentosFallidos || 0) + 1;
 
       // Si ha fallado 3 veces, bloquear la cuenta por 15 minutos
       if (user.intentosFallidos >= 3) {
-        user.bloqueadoHasta = new Date(Date.now() + 15 * 60 * 1000); // Bloquear 15 minutos
+        user.bloqueadoHasta = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+        await user.save();
+        
+        return res.status(403).json({ 
+          message: "Has superado el límite de intentos. Tu cuenta ha sido bloqueada temporalmente por 15 minutos." 
+        });
       }
 
       await user.save();
 
-      return res.status(401).json({ message: "Contraseña incorrecta" });
+      return res.status(401).json({ 
+        message: `Contraseña incorrecta. Te quedan ${3 - user.intentosFallidos} intentos.` 
+      });
     }
 
-    // Si la contraseña es correcta, resetear los intentos fallidos
+    // ✅ Si la contraseña es correcta, resetear los intentos fallidos y desbloquear
     user.intentosFallidos = 0;
-    user.bloqueadoHasta = null; // Asegurarse de que la cuenta no esté bloqueada
-
+    user.bloqueadoHasta = null;
     await user.save();
 
     res.status(200).json({
