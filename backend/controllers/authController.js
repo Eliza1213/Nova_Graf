@@ -126,7 +126,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// 🔹 Login con bloqueo temporal por intentos fallidos
+// 🔹 Login con bloqueo por intentos fallidos
 export const login = async (req, res) => {
   const { correo, contraseña } = req.body;
 
@@ -134,34 +134,22 @@ export const login = async (req, res) => {
     const user = await Usuario.findOne({ correo });
     if (!user) return res.status(404).json({ message: "El correo no está registrado" });
 
-    // Verificar si es usuario de Google
+    // Verificar si la cuenta está bloqueada
+    if (user.bloqueadoHasta && user.bloqueadoHasta > new Date()) {
+      const tiempoRestante = Math.ceil((user.bloqueadoHasta - new Date()) / 1000); // segundos restantes
+      return res.status(403).json({ 
+        message: `Tu cuenta está bloqueada. Intenta de nuevo en ${tiempoRestante} segundos.` 
+      });
+    }
+
+    // Si la cuenta no está bloqueada, proceder con la validación de contraseña
     if (user.googleUser) {
       return res.status(422).json({ 
         message: "Esta cuenta fue registrada con Google. Por favor inicia sesión usando Google Sign-In." 
       });
     }
 
-    // Verificar si la cuenta está confirmada (activada con OTP)
-    if (!user.confirmado) {
-      return res.status(403).json({ 
-        message: "Tu cuenta no está activada. Revisa tu correo para el código de verificación." 
-      });
-    }
-
-    // ⏱️ BLOQUEO TEMPORAL: Verificar si está bloqueada por intentos fallidos
-    if (user.bloqueadoHasta && user.bloqueadoHasta > new Date()) {
-      const tiempoRestante = Math.ceil((user.bloqueadoHasta - new Date()) / 60000); // minutos
-      return res.status(403).json({ 
-        message: `Cuenta bloqueada temporalmente por múltiples intentos fallidos. Podrás intentar nuevamente en ${tiempoRestante} minuto${tiempoRestante > 1 ? 's' : ''}.` 
-      });
-    }
-
-    // Si el bloqueo ya expiró, limpiar automáticamente
-    if (user.bloqueadoHasta && user.bloqueadoHasta <= new Date()) {
-      user.bloqueadoHasta = null;
-      user.intentosFallidos = 0;
-      await user.save();
-    }
+    if (!user.confirmado) return res.status(403).json({ message: "Tu cuenta no está activada. Revisa tu correo." });
 
     if (!user.password) {
       return res.status(422).json({ 
@@ -169,38 +157,28 @@ export const login = async (req, res) => {
       });
     }
 
-    // Validar contraseña
     const passwordValida = await bcrypt.compare(contraseña, user.password);
 
     if (!passwordValida) {
-      // Incrementar intentos fallidos
-      user.intentosFallidos = (user.intentosFallidos || 0) + 1;
-
-      // 🔒 Si llega a 3 intentos → BLOQUEO TEMPORAL de 15 minutos
+      user.intentosFallidos += 1;
+      
       if (user.intentosFallidos >= 3) {
-        user.bloqueadoHasta = new Date(Date.now() + 15 * 60 * 1000);
+        // Bloquear la cuenta por 10 minutos (600,000 ms)
+        user.bloqueadoHasta = new Date(Date.now() + 600000);
         await user.save();
-        
-        return res.status(403).json({ 
-          message: "Has excedido el límite de intentos permitidos. Tu cuenta ha sido bloqueada temporalmente por 15 minutos por seguridad." 
-        });
+        return res.status(403).json({ message: "Has excedido el número de intentos. Tu cuenta está bloqueada temporalmente." });
       }
 
       await user.save();
-      
-      const intentosRestantes = 3 - user.intentosFallidos;
-      return res.status(401).json({ 
-        message: `Contraseña incorrecta. Te ${intentosRestantes === 1 ? 'queda' : 'quedan'} ${intentosRestantes} intento${intentosRestantes > 1 ? 's' : ''}.` 
-      });
+      return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
-    // ✅ Contraseña correcta → Limpiar bloqueo y resetear intentos
+    // Si la contraseña es válida, reiniciar los intentos fallidos
     user.intentosFallidos = 0;
-    user.bloqueadoHasta = null;
     await user.save();
 
     res.status(200).json({
-      message: `¡Bienvenido ${user.nombre}!`,
+      message: `Bienvenido ${user.nombre}!`,
       usuario: {
         id: user._id,
         correo: user.correo,
@@ -212,6 +190,7 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
 
 // 🔐 Verificar respuesta de pregunta secreta
 export const verificarRespuestaSecreta = async (req, res) => {
